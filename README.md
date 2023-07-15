@@ -1,6 +1,6 @@
 # Solidity Learning
 
-Solidity smart contracts for learning purposes.
+Solidity smart contracts created for learning purposes.
 
 Built and tested with [Truffle Suite](https://trufflesuite.com) on [Sepolia](https://www.infura.io) test network.
 
