@@ -1,24 +1,28 @@
-const Instance          = artifacts.require("Instance");
-const Fallback          = artifacts.require("Fallback");
-const Fallout           = artifacts.require("Fallout");
-const CoinFlip          = artifacts.require("CoinFlip");
-const CoinFlipExploit   = artifacts.require("CoinFlipExploit");
-const Telephone         = artifacts.require("Telephone");
-const TelephoneExploit  = artifacts.require("TelephoneExploit");
-const Token             = artifacts.require("Token");
-const Delegate          = artifacts.require("Delegate");
-const Force             = artifacts.require("Force");
-const ForceExploit      = artifacts.require("ForceExploit");
-const Vault             = artifacts.require("Vault");
-const King              = artifacts.require("King");
-const KingExploit       = artifacts.require("KingExploit");
-const Reentrance        = artifacts.require("Reentrance");
-const ReentranceExploit = artifacts.require("ReentranceExploit");
-const Elevator          = artifacts.require("Elevator");
-const ElevatorExploit   = artifacts.require("ElevatorExploit");
-const Privacy           = artifacts.require("Privacy");
-const Gatekeeper        = artifacts.require("Gatekeeper");
-const GatekeeperExploit = artifacts.require("GatekeeperExploit");
+const Instance             = artifacts.require("Instance");
+const Fallback             = artifacts.require("Fallback");
+const Fallout              = artifacts.require("Fallout");
+const CoinFlip             = artifacts.require("CoinFlip");
+const CoinFlipExploit      = artifacts.require("CoinFlipExploit");
+const Telephone            = artifacts.require("Telephone");
+const TelephoneExploit     = artifacts.require("TelephoneExploit");
+const Token                = artifacts.require("Token");
+const Delegate             = artifacts.require("Delegate");
+const Force                = artifacts.require("Force");
+const ForceExploit         = artifacts.require("ForceExploit");
+const Vault                = artifacts.require("Vault");
+const King                 = artifacts.require("King");
+const KingExploit          = artifacts.require("KingExploit");
+const Reentrance           = artifacts.require("Reentrance");
+const ReentranceExploit    = artifacts.require("ReentranceExploit");
+const Elevator             = artifacts.require("Elevator");
+const ElevatorExploit      = artifacts.require("ElevatorExploit");
+const Privacy              = artifacts.require("Privacy");
+const Gatekeeper           = artifacts.require("Gatekeeper");
+const GatekeeperExploit    = artifacts.require("GatekeeperExploit");
+const GatekeeperTwo        = artifacts.require("GatekeeperTwo");
+const GatekeeperTwoExploit = artifacts.require("GatekeeperTwoExploit");
+
+const { expectRevert }     = require('@openzeppelin/test-helpers');
 
 contract("Ethernaut", (accounts) => {
 	const owner   = accounts[0];
@@ -277,6 +281,21 @@ contract("Ethernaut", (accounts) => {
 			}
 			const entrantCurrent = await contract.entrant();
 			assert.equal(hacker, entrantCurrent, "Failed to pass level 13."); // become the entrant to pass the level
+		});
+	});
+
+	describe("Level 14 - GatekeeperTwo", async () => {
+		it("Deploy GatekeeperTwo and GatekeeperTwoExploit Contracts", async () => {
+			let deployed = await GatekeeperTwo.deployed();
+			assert(deployed, "GatekeeperTwo contract is not deployed.");
+			deployed = await GatekeeperTwoExploit.deployed();
+			assert(deployed, "GatekeeperTwoExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await GatekeeperTwo.new();
+			const exploit = await GatekeeperTwoExploit.new(contract.address, { from: hacker }); // use a proxy contract and constructor method to bypass gateOne(), gateTwo(), and gateThree() modifiers
+			const entrantCurrent = await contract.entrant();
+			assert.equal(hacker, entrantCurrent, "Failed to pass level 14."); // become the entrant to pass the level
 		});
 	});
 });

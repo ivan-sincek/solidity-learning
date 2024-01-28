@@ -2,7 +2,7 @@
 
 Solidity smart contracts created for learning purposes.
 
-Built and tested with [Truffle Suite](https://trufflesuite.com) on [Sepolia](https://www.infura.io) test network and on local network using [Ganache](https://trufflesuite.com/ganache).
+Built and tested with [Truffle Suite](https://trufflesuite.com) on a local test network using [Ganache](https://trufflesuite.com/ganache) and on [Sepolia](https://www.infura.io) public test network.
 
 Work in progress...
 
@@ -15,13 +15,13 @@ Work in progress...
 
 ## Instructions
 
-Download the repository:
+Clone the repository:
 
 ```fundamental
 git clone https://github.com/ivan-sincek/solidity-learning
 ```
 
-Change the directory to desired project:
+Change the directory to a desired project:
 
 ```fundamental
 cd Fundraiser
@@ -33,14 +33,26 @@ Wherever you see [package.json](https://github.com/ivan-sincek/solidity-learning
 npm install
 ```
 
-Wherever you see [.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/.env) file, specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io/) wallet mnemonic inside the file.
+Start a local test network using Ganache. Make sure to change the port number to `8545`.
 
-Start unit tests by running:
+<p align="center"><img src="https://github.com/ivan-sincek/solidity-learning/blob/main/img/ganache_setup.jpg" alt="Ganache Setup"></p>
+
+<p align="center">Figure 1 - Ganache Setup</p>
+
+Start unit tests a local network by running:
+
+```fundamental
+truffle test --network development --show-events
+```
+
+---
+
+Wherever you see [.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/.env) file, you can specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io/) wallet mnemonic inside the file to test on Sepolia public test network.
+
+Start unit tests on Sepolia public test network:
 
 ```fundamental
 truffle test --network sepolia --show-events
-
-truffle test --network development --show-events
 ```
 
 ## Fundraiser
@@ -65,7 +77,7 @@ Client:
 
 <p align="center"><img src="https://github.com/ivan-sincek/solidity-learning/blob/main/img/github_fundraiser.jpg" alt="GitHub Fundraiser"></p>
 
-<p align="center">Figure 1 - GitHub Fundraiser</p>
+<p align="center">Figure 2 - GitHub Fundraiser</p>
 
 ## Ethernaut
 
@@ -75,7 +87,7 @@ Solutions:
 
 ## Metamorphic Malware
 
-Still working on it...
+Work in progress...
 
 Smart contracts:
 
