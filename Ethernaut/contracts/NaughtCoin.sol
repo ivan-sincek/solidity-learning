@@ -33,5 +33,5 @@ contract NaughtCoin is ERC20 {
         } else {
             _;
         }
-    } 
+    }
 }

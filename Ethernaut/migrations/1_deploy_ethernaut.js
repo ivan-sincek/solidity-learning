@@ -23,6 +23,9 @@ const GatekeeperTwo        = artifacts.require("GatekeeperTwo");
 const GatekeeperTwoExploit = artifacts.require("GatekeeperTwoExploit");
 const NaughtCoin           = artifacts.require("NaughtCoin");
 const NaughtCoinExploit    = artifacts.require("NaughtCoinExploit");
+const LibraryContract      = artifacts.require("LibraryContract");
+const Preservation         = artifacts.require("Preservation");
+const PreservationExploit  = artifacts.require("PreservationExploit");
 
 module.exports = function (deployer, network, accounts) {
 	const owner  = accounts[0];
@@ -52,4 +55,6 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(GatekeeperTwo).then(function() { return deployer.deploy(GatekeeperTwoExploit, GatekeeperTwo.address); });
 	deployer.deploy(NaughtCoin, owner);
 	deployer.deploy(NaughtCoinExploit, owner);
+	deployer.deploy(LibraryContract).then(function() { return deployer.deploy(Preservation, LibraryContract.address, LibraryContract.address); });
+	deployer.deploy(PreservationExploit);
 };
