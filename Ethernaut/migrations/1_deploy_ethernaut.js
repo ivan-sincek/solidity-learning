@@ -25,6 +25,8 @@ const NaughtCoin           = artifacts.require("NaughtCoin");
 const LibraryContract      = artifacts.require("LibraryContract");
 const Preservation         = artifacts.require("Preservation");
 const PreservationExploit  = artifacts.require("PreservationExploit");
+const Recovery             = artifacts.require("Recovery");
+const RecoveryExploit      = artifacts.require("RecoveryExploit");
 
 module.exports = function (deployer, network, accounts) {
 	const owner  = accounts[0];
@@ -55,4 +57,6 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(NaughtCoin, owner);
 	deployer.deploy(LibraryContract).then(function() { return deployer.deploy(Preservation, LibraryContract.address, LibraryContract.address); });
 	deployer.deploy(PreservationExploit);
+	deployer.deploy(Recovery);
+	deployer.deploy(RecoveryExploit);
 };

