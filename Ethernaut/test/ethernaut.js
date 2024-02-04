@@ -27,7 +27,8 @@ const Preservation         = artifacts.require("Preservation");
 const PreservationExploit  = artifacts.require("PreservationExploit");
 const Recovery             = artifacts.require("Recovery");
 const RecoveryExploit      = artifacts.require("RecoveryExploit");
-const SimpleToken          = artifacts.require("SimpleToken");
+const MagicNumber          = artifacts.require("MagicNumber");
+const MagicNumberExploit   = artifacts.require("MagicNumberExploit");
 
 const { expectRevert }       = require('@openzeppelin/test-helpers');
 const { getContractAddress } = require("@ethersproject/address");
@@ -360,8 +361,28 @@ contract("Ethernaut", (accounts) => {
 			await exploit.run(targetAddress, hacker);
 			const balanceTargetCurrent = await web3.eth.getBalance(targetAddress);
 			const balanceHackerNew = await web3.eth.getBalance(hacker);
-			assert(balanceHackerNew > balanceHackerOld, "1 Failed to pass level 17."); // steal the whole balance to pass the level
-			assert.equal(balanceTargetCurrent, 0, "2 Failed to pass level 17.");
+			assert(balanceHackerNew > balanceHackerOld, "Failed to pass level 17."); // steal the whole balance to pass the level
+			assert.equal(balanceTargetCurrent, 0, "Failed to pass level 17.");
+		});
+	});
+
+	describe("Level 18 - MagicNumber", async () => {
+		it("Deploy MagicNumber and MagicNumberExploit Contracts", async () => {
+			let deployed = await MagicNumber.deployed();
+			assert(deployed, "MagicNumber contract is not deployed.");
+			deployed = await MagicNumberExploit.deployed();
+			assert(deployed, "MagicNumberExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await MagicNumber.new();
+			const exploit = await MagicNumberExploit.new();
+			await exploit.run(contract.address);
+			assert(await contract.validate(), "Failed to pass level 18.");
+			// another example without exploit contract
+			// const bytecode = "0x600A600C600039600A6000F3602A60005260206000F3";
+			// const txn = await web3.eth.sendTransaction({ from: hacker, data: bytecode }); // to create a smart contract, send transaction without the recipient
+			// await contract.setSolver(txn.contractAddress);
+			// assert(await contract.validate(), "Failed to pass level 18.");
 		});
 	});
 });

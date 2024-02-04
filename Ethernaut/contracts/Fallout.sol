@@ -8,7 +8,7 @@ contract Fallout {
     mapping(address => uint) allocations;
     address payable public owner;
 
-    /* constructor */
+    // constructor
     function Fal1out() public payable {
         owner = payable(msg.sender);
         allocations[owner] = msg.value;

@@ -27,6 +27,8 @@ const Preservation         = artifacts.require("Preservation");
 const PreservationExploit  = artifacts.require("PreservationExploit");
 const Recovery             = artifacts.require("Recovery");
 const RecoveryExploit      = artifacts.require("RecoveryExploit");
+const MagicNumber          = artifacts.require("MagicNumber");
+const MagicNumberExploit   = artifacts.require("MagicNumberExploit");
 
 module.exports = function (deployer, network, accounts) {
 	const owner  = accounts[0];
@@ -59,4 +61,6 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(PreservationExploit);
 	deployer.deploy(Recovery);
 	deployer.deploy(RecoveryExploit);
+	deployer.deploy(MagicNumber);
+	deployer.deploy(MagicNumberExploit);
 };

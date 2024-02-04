@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 contract SimpleToken {
     string public name;
-    mapping (address => uint) public balances;
+    mapping(address => uint) public balances;
 
     // constructor
     constructor(string memory _name, address _creator, uint256 _initialSupply) {
@@ -17,7 +17,7 @@ contract SimpleToken {
     }
 
     // allow transfers of tokens
-    function transfer(address _to, uint _amount) public { 
+    function transfer(address _to, uint _amount) public {
         require(balances[msg.sender] >= _amount);
         balances[msg.sender] = balances[msg.sender] - _amount;
         balances[_to] = _amount;
