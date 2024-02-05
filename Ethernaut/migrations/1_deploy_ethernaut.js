@@ -29,9 +29,15 @@ const Recovery             = artifacts.require("Recovery");
 const RecoveryExploit      = artifacts.require("RecoveryExploit");
 const MagicNumber          = artifacts.require("MagicNumber");
 const MagicNumberExploit   = artifacts.require("MagicNumberExploit");
+const AlienCodex           = artifacts.require("AlienCodex");
+const AlienCodexExploit    = artifacts.require("AlienCodexExploit");
+const Denial               = artifacts.require("Denial");
+const DenialExploit        = artifacts.require("DenialExploit");
 
 module.exports = function (deployer, network, accounts) {
-	const owner  = accounts[0];
+	const owner   = accounts[0];
+	const user    = accounts[1];
+	const hacker  = accounts[2];
 	const amount = web3.utils.toWei("0.00001", "ether");
 
 	deployer.deploy(Instance, "ethernaut0");
@@ -55,7 +61,7 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(Privacy, [web3.utils.padLeft(web3.utils.asciiToHex("ether"), 64), web3.utils.padLeft(web3.utils.asciiToHex("naut"), 64), web3.utils.padLeft(web3.utils.asciiToHex("12"), 64)]);
 	deployer.deploy(Gatekeeper);
 	deployer.deploy(GatekeeperExploit);
-	deployer.deploy(GatekeeperTwo).then(function() { return deployer.deploy(GatekeeperTwoExploit, GatekeeperTwo.address); });
+	deployer.deploy(GatekeeperTwo).then(function() { return deployer.deploy(GatekeeperTwoExploit, GatekeeperTwo.address, { from: hacker }); });
 	deployer.deploy(NaughtCoin, owner);
 	deployer.deploy(LibraryContract).then(function() { return deployer.deploy(Preservation, LibraryContract.address, LibraryContract.address); });
 	deployer.deploy(PreservationExploit);
@@ -63,4 +69,8 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(RecoveryExploit);
 	deployer.deploy(MagicNumber);
 	deployer.deploy(MagicNumberExploit);
+	deployer.deploy(AlienCodex);
+	deployer.deploy(AlienCodexExploit);
+	deployer.deploy(Denial);
+	deployer.deploy(DenialExploit);
 };
