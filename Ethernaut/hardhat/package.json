@@ -1,0 +1,16 @@
+{
+    "name": "ethernaut-project",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "@openzeppelin/contracts": "4.9.2",
+        "hardhat": "^2.19.5"
+    }
+}

@@ -1,67 +1,75 @@
 # Solidity Learning
 
-Solidity smart contracts created for learning purposes.
+This repository contains Solidity smart contracts and CTF-like challenges for learning purposes.
 
-Built and tested with [Truffle Suite](https://trufflesuite.com) on a local test network using [Ganache](https://trufflesuite.com/ganache) and on [Sepolia](https://www.infura.io) public test network.
+Built and tested with [Hardhat](https://hardhat.org), and [Truffle Suite](https://trufflesuite.com) (depricated) on a local test network using [Ganache](https://trufflesuite.com/ganache) (depricated) and on [Sepolia](https://www.infura.io) public test network.
 
-Work in progress...
+Work in progress... Migrating Ethernaut from Truffle to Hardhat...
 
 ## Table of Contents
 
-* [Instructions](#instructions)
 * [Fundraiser](#fundraiser)
+* [Ethernaut](#ethernaut)
 * [Ethernaut](#ethernaut)
 * [Metamorphic Malware](#metamorphic-malware)
 
-## Instructions
+## Fundraiser
 
-Clone the repository:
+Built and tested with [Truffle Suite](https://trufflesuite.com) (depricated) on a local test network using [Ganache](https://trufflesuite.com/ganache) (depricated) and on [Sepolia](https://www.infura.io) public test network.
 
-```fundamental
-git clone https://github.com/ivan-sincek/solidity-learning
-```
-
-Change the directory to a desired project:
+Install Truffle:
 
 ```fundamental
-cd Fundraiser
+npm install -g truffle
 ```
 
-Wherever you see [package.json](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/package.json) file, install the required dependencies by running:
-
-```fundamental
-npm install
-```
-
-Start a local test network using Ganache. Make sure to change the port number to `8545`.
+Make sure to start a local test network using Ganache on port `8545`.
 
 <p align="center"><img src="https://github.com/ivan-sincek/solidity-learning/blob/main/img/ganache_setup.jpg" alt="Ganache Setup"></p>
 
 <p align="center">Figure 1 - Ganache Setup</p>
 
-Start unit tests a local network by running:
+---
+
+From [\\Fundraiser\\truffle](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle), run the unit tests:
 
 ```fundamental
+npm install
+
+truffle compile
+
 truffle test --network development --show-events
 ```
 
+From [\\Fundraiser\\client](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/client), run the client web application:
+
+```fundamental
+npm install
+
+npm start
+```
+
+Navigate to the client web application with your preferred web browser.
+
+<p align="center"><img src="https://github.com/ivan-sincek/solidity-learning/blob/main/img/github_fundraiser.jpg" alt="GitHub Fundraiser"></p>
+
+<p align="center">Figure 2 - GitHub Fundraiser</p>
+
 ---
 
-Wherever you see [.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/.env) file, you can specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io/) wallet mnemonic inside the file to test on Sepolia public test network.
-
-Start unit tests on Sepolia public test network:
+To run the unit tests on [Sepolia](https://www.infura.io) public test network, inside [\\Fundraiser\\truffle\\.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/.env) file, specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io/) wallet mnemonic, then, run:
 
 ```fundamental
 truffle test --network sepolia --show-events
 ```
 
-## Fundraiser
+---
 
 Smart contracts:
 
 * [\\Fundraiser\\truffle\\contracts\\Fundraiser.sol](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/contracts/Fundraiser.sol)
 
-Unit Tests:
+Unit tests:
 
 * [\\Fundraiser\\truffle\\test\\fundraiser.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/test/fundraiser.js)
 
@@ -69,25 +77,51 @@ Migrations:
 
 * [\\Fundraiser\\truffle\\migrations\\1_deploy_fundraiser.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/migrations/1_deploy_fundraiser.js)
 
-Client:
+Client web application:
 
 * [\\Fundraiser\\client\\src\\components\\Donate.jsx](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/client/src/components/Donate.jsx)
 
----
-
-<p align="center"><img src="https://github.com/ivan-sincek/solidity-learning/blob/main/img/github_fundraiser.jpg" alt="GitHub Fundraiser"></p>
-
-<p align="center">Figure 2 - GitHub Fundraiser</p>
-
 ## Ethernaut
 
-Solutions:
+Built and tested with [Hardhat](https://hardhat.org).
 
-* [\\Ethernaut\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/test/ethernaut.js)
+From [\\Ethernauth\\hardhat](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/hardhat), run the unit tests:
+
+```fundamental
+npm install
+
+npx hardhat compile
+
+npx hardhat test --network localhost --parallel
+```
+
+---
+
+Unit tests (Hardhat):
+
+* [\\Ethernaut\\hardhat\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/hardhat/test/ethernaut.js) (all levels)
+
+\[Depricated\] Unit tests (Truffle):
+
+* [\\Ethernaut\\truffle_depricated\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/truffle/test/ethernaut.js) (level 1-20)
 
 ## Metamorphic Malware
 
+Built and tested with [Truffle Suite](https://trufflesuite.com) (depricated) on a local test network using [Ganache](https://trufflesuite.com/ganache) (depricated).
+
 Work in progress...
+
+From [\\Metamorphic](https://github.com/ivan-sincek/solidity-learning/blob/main/Metamorphic), run the unit tests:
+
+```fundamental
+npm install
+
+truffle compile
+
+truffle test --network development --show-events
+```
+
+---
 
 Smart contracts:
 
