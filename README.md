@@ -10,7 +10,6 @@ Work in progress... Migrating Ethernaut from Truffle to Hardhat...
 
 * [Fundraiser](#fundraiser)
 * [Ethernaut](#ethernaut)
-* [Ethernaut](#ethernaut)
 * [Metamorphic Malware](#metamorphic-malware)
 
 ## Fundraiser
@@ -103,7 +102,7 @@ Unit tests (Hardhat):
 
 \[Depricated\] Unit tests (Truffle):
 
-* [\\Ethernaut\\truffle_depricated\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/truffle/test/ethernaut.js) (level 1-20)
+* [\\Ethernaut\\truffle_depricated\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/truffle_depricated/test/ethernaut.js) (level 1-20)
 
 ## Metamorphic Malware
 
