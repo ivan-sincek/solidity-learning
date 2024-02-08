@@ -18,9 +18,9 @@ async function main() {
     await contract.waitForDeployment();
     contract = await ethers.deployContract("TelephoneExploit");
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("Token", [amount], { from: owner.address });
+    contract = await ethers.deployContract("Token", [amount], { from: owner });
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("Delegate", [owner.address]);
+    contract = await ethers.deployContract("Delegate", [owner]);
     await contract.waitForDeployment();
     contract = await ethers.deployContract("Force");
     await contract.waitForDeployment();
@@ -28,7 +28,7 @@ async function main() {
     await contract.waitForDeployment();
     contract = await ethers.deployContract("Vault", [ethers.encodeBytes32String("ethernaut8")]);
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("King", { from: owner.address, value: amount });
+    contract = await ethers.deployContract("King", { from: owner, value: amount });
     await contract.waitForDeployment();
     contract = await ethers.deployContract("KingExploit");
     await contract.waitForDeployment();
@@ -48,13 +48,13 @@ async function main() {
     await contract.waitForDeployment();
     contract = await ethers.deployContract("GatekeeperTwo");
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("GatekeeperTwoExploit", [contract.address], { from: hacker.address });
+    contract = await ethers.deployContract("GatekeeperTwoExploit", [contract], { from: hacker });
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("NaughtCoin", [owner.address]);
+    contract = await ethers.deployContract("NaughtCoin", [owner]);
     await contract.waitForDeployment();
     contract = await ethers.deployContract("LibraryContract");
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("Preservation", [contract.address, contract.address]);
+    contract = await ethers.deployContract("Preservation", [contract, contract]);
     await contract.waitForDeployment();
     contract = await ethers.deployContract("PreservationExploit");
     await contract.waitForDeployment();
