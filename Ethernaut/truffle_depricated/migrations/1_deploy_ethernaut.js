@@ -58,7 +58,7 @@ module.exports = function (deployer, network, accounts) {
 	deployer.deploy(ReentranceExploit);
 	deployer.deploy(Elevator);
 	deployer.deploy(ElevatorExploit);
-	deployer.deploy(Privacy, [web3.utils.padLeft(web3.utils.asciiToHex("ether"), 64), web3.utils.padLeft(web3.utils.asciiToHex("naut"), 64), web3.utils.padLeft(web3.utils.asciiToHex("12"), 64)]);
+	deployer.deploy(Privacy, [web3.utils.padRight(web3.utils.asciiToHex("ether"), 64), web3.utils.padRight(web3.utils.asciiToHex("naut"), 64), web3.utils.padRight(web3.utils.asciiToHex("12"), 64)]);
 	deployer.deploy(Gatekeeper);
 	deployer.deploy(GatekeeperExploit);
 	deployer.deploy(GatekeeperTwo).then(function() { return deployer.deploy(GatekeeperTwoExploit, GatekeeperTwo.address, { from: hacker }); });
