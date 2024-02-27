@@ -9,8 +9,10 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
+        "@ethersproject/address": "^5.7.0",
         "@nomicfoundation/hardhat-toolbox": "^4.0.0",
         "@openzeppelin/contracts": "4.9.2",
-        "hardhat": "^2.19.5"
+        "chai-as-promised": "^7.1.1",
+        "hardhat": "^2.20.1"
     }
 }

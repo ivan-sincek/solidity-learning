@@ -270,7 +270,7 @@ contract("Ethernaut", (accounts) => {
 				// brute-force the gas to bypass gateTwo() modifier | trial and error | the scope was adjusted to speed up the test
 				try {
 					await exploit.run(contract.address, { from: hacker, gas: 800000 + i });
-					// console.log(i); // required gas is 800000 + 15628 = 8015628
+					// console.log(i); // required gas is 800000 + 15628 = 815628
 					break;
 				} catch (err) {}
 			}
@@ -344,7 +344,6 @@ contract("Ethernaut", (accounts) => {
 			await web3.eth.sendTransaction({ from: user, to: targetAddress, value: amount, data: null }); // deposit some real ETH in exchange for tokens
 			const balanceHackerOld = await web3.eth.getBalance(hacker);
 			await exploit.run(targetAddress, hacker);
-			const balanceTargetCurrent = await web3.eth.getBalance(targetAddress);
 			const balanceHackerNew = await web3.eth.getBalance(hacker);
 			assert(balanceHackerNew > balanceHackerOld, "Failed to pass level 17."); // withdraw the whole balance to pass the level
 		});
@@ -367,6 +366,7 @@ contract("Ethernaut", (accounts) => {
 			// const bytecode = "0x600A600C600039600A6000F3602A60005260206000F3";
 			// const txn = await web3.eth.sendTransaction({ from: hacker, data: bytecode }); // to create a smart contract, send a transaction without the recipient
 			// await contract.setSolver(txn.contractAddress);
+			// const validateCurrent = await contract.validate();
 			// assert(validateCurrent, "Failed to pass level 18.");
 		});
 	});
@@ -374,9 +374,9 @@ contract("Ethernaut", (accounts) => {
 	describe("Level 19 - AlienCodex", async () => {
 		it("Deploy AlienCodex and AlienCodexExploit Contracts", async () => {
 			let deployed = await AlienCodex.deployed();
-			assert(deployed, "MagicNumber contract is not deployed.");
+			assert(deployed, "AlienCodex contract is not deployed.");
 			deployed = await AlienCodexExploit.deployed();
-			assert(deployed, "MagicNumberExploit contract is not deployed.");
+			assert(deployed, "AlienCodexExploit contract is not deployed.");
 		});
 		it("Exploit", async () => {
 			const contract = await AlienCodex.new();
@@ -391,9 +391,9 @@ contract("Ethernaut", (accounts) => {
 	describe("Level 20 - Denial", async () => {
 		it("Deploy Denial and DenialExploit Contracts", async () => {
 			let deployed = await Denial.deployed();
-			assert(deployed, "MagicNumber contract is not deployed.");
+			assert(deployed, "Denial contract is not deployed.");
 			deployed = await DenialExploit.deployed();
-			assert(deployed, "MagicNumberExploit contract is not deployed.");
+			assert(deployed, "DenialExploit contract is not deployed.");
 		});
 		it("Exploit", async () => {
 			const contract = await Denial.new();
