@@ -3,6 +3,7 @@ async function main() {
 	const invalid               = "0x0000000000000000000000000000000000000000";
 	const amount                = ethers.parseEther("0.00001");
     let contract                = null;
+    let dex                     = null;
 
     contract = await ethers.deployContract("Instance", ["ethernaut0"]);
     await contract.waitForDeployment();
@@ -48,7 +49,7 @@ async function main() {
     await contract.waitForDeployment();
     contract = await ethers.deployContract("GatekeeperTwo");
     await contract.waitForDeployment();
-    contract = await ethers.deployContract("GatekeeperTwoExploit", [contract], { from: hacker });
+    contract = await ethers.deployContract("GatekeeperTwoExploit", [contract], { signer: hacker });
     await contract.waitForDeployment();
     contract = await ethers.deployContract("NaughtCoin", [owner]);
     await contract.waitForDeployment();
@@ -76,6 +77,14 @@ async function main() {
     await contract.waitForDeployment();
     contract = await ethers.deployContract("Shop");
     await contract.waitForDeployment();
+    contract = await ethers.deployContract("ShopExploit");
+    await contract.waitForDeployment();
+    dex = await ethers.deployContract("Dex", { from: owner });
+    await dex.waitForDeployment();
+    contract = await ethers.deployContract("SwappableToken", [dex, "Token 1", "T1", 100], { signer: owner });
+    await contract.waitForDeployment();
+    contract = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 100], { signer: owner });
+    await contract.waitForDeployment();  
 }
 
 main().catch((error) => {

