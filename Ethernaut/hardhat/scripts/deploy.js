@@ -84,7 +84,17 @@ async function main() {
     contract = await ethers.deployContract("SwappableToken", [dex, "Token 1", "T1", 100], { signer: owner });
     await contract.waitForDeployment();
     contract = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 100], { signer: owner });
-    await contract.waitForDeployment();  
+    await contract.waitForDeployment();
+    dex = await ethers.deployContract("DexTwo", { from: owner });
+    await dex.waitForDeployment();
+    contract = await ethers.deployContract("SwappableToken", [dex, "Token 1", "T1", 100], { signer: owner });
+    await contract.waitForDeployment();
+    contract = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 100], { signer: owner });
+    await contract.waitForDeployment();
+    contract = await ethers.deployContract("DexTwoExploit", ["Exploit 1", "E1", 200], { signer: hacker });
+    await contract.waitForDeployment();
+    contract = await ethers.deployContract("DexTwoExploit", ["Exploit 2", "E1", 200], { signer: hacker });
+    await contract.waitForDeployment();
 }
 
 main().catch((error) => {

