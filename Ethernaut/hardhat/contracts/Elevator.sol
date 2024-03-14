@@ -11,7 +11,6 @@ contract Elevator {
 
     function goTo(uint _floor) public {
         Building building = Building(msg.sender);
-
         if (!building.isLastFloor(_floor)) {
             floor = _floor;
             top = building.isLastFloor(floor);

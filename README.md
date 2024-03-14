@@ -56,7 +56,7 @@ Navigate to the client web application with your preferred web browser.
 
 ---
 
-To run the unit tests on [Sepolia](https://www.infura.io) public test network, inside [\\Fundraiser\\truffle\\.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/.env) file, specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io/) wallet mnemonic, then, run:
+To run the unit tests on [Sepolia](https://www.infura.io) public test network, inside [\\Fundraiser\\truffle\\example.env](https://github.com/ivan-sincek/solidity-learning/blob/main/Fundraiser/truffle/example.env) file, specify your [Infura](https://www.infura.io) (Sepolia) API key and [MetaMask](https://metamask.io) wallet mnemonic, then, rename `example.env` to `.env` and run:
 
 ```fundamental
 truffle test --network sepolia --show-events
