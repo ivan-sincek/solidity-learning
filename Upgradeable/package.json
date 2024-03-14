@@ -1,6 +1,0 @@
-{
-    "name": "upgradeable-project",
-    "dependencies": {
-        "@nomicfoundation/hardhat-toolbox": "^5.0.0"
-    }
-}

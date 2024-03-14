@@ -4,12 +4,20 @@ This repository contains Solidity smart contracts and CTF-like challenges for le
 
 Built and tested with [Hardhat](https://hardhat.org), and [Truffle Suite](https://trufflesuite.com) (depricated) on a local test network using [Ganache](https://trufflesuite.com/ganache) (depricated) and on [Sepolia](https://www.infura.io) public test network.
 
-Work in progress... Migrating Ethernaut from Truffle to Hardhat...
+Additional resources:
+
+* [docs.openzeppelin.com/](https://docs.openzeppelin.com)
+* [wizard.openzeppelin.com](https://wizard.openzeppelin.com)
+* [hardhat.org/docs](https://hardhat.org/docs)
+* [infura.io/faucet/sepolia](https://www.infura.io/faucet/sepolia)
+
+Work in progress...
 
 ## Table of Contents
 
 * [Fundraiser](#fundraiser)
 * [Ethernaut](#ethernaut)
+* [Upgradeable Token](#upgradeable-token)
 * [Metamorphic Malware](#metamorphic-malware)
 
 ## Fundraiser
@@ -103,6 +111,10 @@ Unit tests (Hardhat):
 \[Depricated\] Unit tests (Truffle):
 
 * [\\Ethernaut\\truffle_depricated\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/truffle_depricated/test/ethernaut.js) (level 1-20)
+
+## Upgradeable Token
+
+Work in progress...
 
 ## Metamorphic Malware
 

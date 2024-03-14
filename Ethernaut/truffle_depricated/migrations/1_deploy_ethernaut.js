@@ -36,7 +36,6 @@ const DenialExploit        = artifacts.require("DenialExploit");
 
 module.exports = function (deployer, network, accounts) {
 	const owner   = accounts[0];
-	const user    = accounts[1];
 	const hacker  = accounts[2];
 	const amount = web3.utils.toWei("0.00001", "ether");
 

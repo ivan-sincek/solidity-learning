@@ -1,8 +1,8 @@
-const chai = require("chai");
-const { assert, expect } = chai;
-var chaiAsPromised = require("chai-as-promised");
-chai.use(chaiAsPromised);
 const { getContractAddress } = require("@ethersproject/address");
+let chaiAsPromised           = require("chai-as-promised");
+const chai                   = require("chai");
+const { assert, expect }     = chai;
+chai.use(chaiAsPromised);
 
 describe("Ethernaut", function () {
 	let owner, user, hacker = null;
