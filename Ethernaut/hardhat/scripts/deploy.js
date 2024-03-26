@@ -1,6 +1,6 @@
 async function main() {
-	const [owner, hacker]    = await ethers.getSigners();
-	const amount             = ethers.parseEther("0.00001");
+    const [owner, hacker]    = await ethers.getSigners();
+    const amount             = ethers.parseEther("0.00001");
     let contract1, contract2 = null;
 
     contract1 = await ethers.deployContract("Instance", ["ethernaut0"]);
