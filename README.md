@@ -114,7 +114,17 @@ Unit tests (Hardhat):
 
 ## Upgradeable Token
 
-Work in progress...
+Smart contracts:
+
+* [\\Upgradeable Token\\contracts\\](https://github.com/ivan-sincek/solidity-learning/tree/main/UpgradeableToken/contracts)
+
+Unit tests:
+
+* [\\Upgradeable Token\\test\\upgradeable.js](https://github.com/ivan-sincek/solidity-learning/blob/main/UpgradeableToken/test/upgradeable.js)
+
+Migrations:
+
+* [\\Upgradeable Token\\scripts\\deploy.js](https://github.com/ivan-sincek/solidity-learning/blob/main/UpgradeableToken/scripts/deploy.js)
 
 ## Metamorphic Malware
 
