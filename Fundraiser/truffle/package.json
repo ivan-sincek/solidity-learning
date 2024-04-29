@@ -1,0 +1,14 @@
+{
+    "name": "fundraiser-project",
+    "version": "0.1.0",
+    "description": "Truffle project with Fundraiser contract",
+    "scripts": {
+        "test": "truffle test"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^4.9.0",
+        "@openzeppelin/test-helpers": "^0.5.16",
+        "@truffle/hdwallet-provider": "^2.1.7",
+        "dotenv": "^16.1.1"
+    }
+}

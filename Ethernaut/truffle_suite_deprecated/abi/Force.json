@@ -1,0 +1,74 @@
+{
+    "contractName": "Force",
+    "abi": [],
+    "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Force.sol\":\"Force\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Force.sol\":{\"keccak256\":\"0x654a4147e5275f98f0db57dee9d7009432514e364e7fafd8ed48db18f553b26c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a1dd97399a3e7a0926e6eb9c6e567d8ca42eda9581be8631190d28ba96024b88\",\"dweb:/ipfs/QmYeYvfKYLB7qXcHDotJykMQxQdE798TaCkm8CFDTKsGEq\"]}},\"version\":1}",
+    "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220522d3e66cf0d64e271d83942810c525c8d6e3950b64ee6b6323490e75593ea2764736f6c63430008130033",
+    "deployedBytecode": "0x6080604052600080fdfea2646970667358221220522d3e66cf0d64e271d83942810c525c8d6e3950b64ee6b6323490e75593ea2764736f6c63430008130033",
+    "immutableReferences": {},
+    "generatedSources": [],
+    "deployedGeneratedSources": [],
+    "sourceMap": "60:124:7:-:0;;;;;;;;;;;;;;;;;;;",
+    "deployedSourceMap": "60:124:7:-:0;;;;;",
+    "source": "// SPDX-License-Identifier: MIT\r\npragma solidity 0.8.19;\r\n\r\ncontract Force {/*\r\n                   MEOW ?\r\n         /\\_/\\   /\r\n    ____/ o o \\\r\n  /~____  =ø= /\r\n (______)__m_m)\r\n\r\n*/}\r\n",
+    "sourcePath": "C:\\Users\\W11BB\\Desktop\\github_my\\solidity-learning\\Ethernaut\\contracts\\Force.sol",
+    "ast": {
+        "absolutePath": "project:/contracts/Force.sol",
+        "exportedSymbols": {
+            "Force": [
+                540
+            ]
+        },
+        "id": 541,
+        "license": "MIT",
+        "nodeType": "SourceUnit",
+        "nodes": [
+            {
+                "id": 539,
+                "literals": [
+                    "solidity",
+                    "0.8",
+                    ".19"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "33:23:7"
+            },
+            {
+                "abstract": false,
+                "baseContracts": [],
+                "canonicalName": "Force",
+                "contractDependencies": [],
+                "contractKind": "contract",
+                "fullyImplemented": true,
+                "id": 540,
+                "linearizedBaseContracts": [
+                    540
+                ],
+                "name": "Force",
+                "nameLocation": "69:5:7",
+                "nodeType": "ContractDefinition",
+                "nodes": [],
+                "scope": 541,
+                "src": "60:124:7",
+                "usedErrors": []
+            }
+        ],
+        "src": "33:153:7"
+    },
+    "compiler": {
+        "name": "solc",
+        "version": "0.8.19+commit.7dd6d404.Emscripten.clang"
+    },
+    "networks": {},
+    "schemaVersion": "3.4.16",
+    "updatedAt": "2024-02-04T01:17:06.581Z",
+    "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+    },
+    "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+    }
+}
