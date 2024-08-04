@@ -16,15 +16,15 @@ contract AlienCodex is Ownable {
         contact = true;
     }
 
-    function record(bytes32 _content) contacted public {
+    function record(bytes32 _content) public contacted {
         codex.push(_content);
     }
 
-    function retract() contacted public {
+    function retract() public contacted {
         // codex.length--;
     }
 
-    function revise(uint i, bytes32 _content) contacted public {
+    function revise(uint i, bytes32 _content) public contacted {
         codex[i] = _content;
     }
 }

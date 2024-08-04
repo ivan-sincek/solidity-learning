@@ -10,7 +10,7 @@ contract Preservation {
     // sets the function signature for delegatecall()
     bytes4 constant setTimeSignature = bytes4(keccak256("setTime(uint256)"));
 
-    constructor(address _timeZone1LibraryAddress,address _timeZone2LibraryAddress) {
+    constructor(address _timeZone1LibraryAddress, address _timeZone2LibraryAddress) {
         timeZone1Library = _timeZone1LibraryAddress;
         timeZone2Library = _timeZone2LibraryAddress;
         owner = msg.sender;

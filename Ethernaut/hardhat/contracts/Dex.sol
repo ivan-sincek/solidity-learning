@@ -45,7 +45,7 @@ contract Dex is Ownable {
 
 contract SwappableToken is ERC20 {
     address private _dex;
-    
+
     constructor(address dexInstance, string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
         _mint(msg.sender, initialSupply);
         _dex = dexInstance;

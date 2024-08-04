@@ -8,6 +8,7 @@ describe("Ethernaut", function () {
 	let owner, user, hacker = null;
 	const invalid           = "0x0000000000000000000000000000000000000000";
 	const amount            = ethers.parseEther("0.00001");
+	const maxSupply         = ethers.parseEther("10");
 
 	before(async () => {
         [owner, user, hacker] = await ethers.getSigners();
@@ -331,6 +332,27 @@ describe("Ethernaut", function () {
 			const balanceCurrentToken2 = await dex.balanceOf(token_2, dex);
 			expect(balanceCurrentToken1).to.equal(0, "Failed to pass level 23."); // drain all of the tokens to pass the level
 			expect(balanceCurrentToken2).to.equal(0, "Failed to pass level 23.");
+		});
+	});
+
+	describe("Level 24 - Puzzle", async () => {
+		it("Exploit", async () => {
+			const implementationFactory = await ethers.getContractFactory("PuzzleWallet");
+    		const implementation = await implementationFactory.connect(owner).deploy();
+			await implementation.waitForDeployment();
+
+			const initialize = implementation.interface.encodeFunctionData("init", [1000]);
+
+			const proxyFactory = await ethers.getContractFactory("PuzzleProxy");
+    		const proxy = await proxyFactory.connect(owner).deploy(owner, implementation, initialize);
+			await proxy.waitForDeployment();
+			console.log(proxy);
+
+			const proxyImplementation = implementationFactory.attach(proxy);
+			await proxyImplementation.connect(owner).addToWhitelist(owner);
+			await proxyImplementation.connect(owner).setMaxBalance(1000);
+			const maxBalance = await proxyImplementation.maxBalance();
+			console.log(maxBalance);
 		});
 	});
 });

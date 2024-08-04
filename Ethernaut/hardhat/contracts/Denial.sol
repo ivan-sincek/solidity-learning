@@ -16,11 +16,11 @@ contract Denial {
         uint amountToSend = address(this).balance / 100;
         // perform a call without checking return
         // the recipient can revert, the owner will still get their share
-        partner.call{value:amountToSend}("");
+        partner.call{value: amountToSend}("");
         payable(owner).transfer(amountToSend);
         // keep track of last withdrawal time
         timeLastWithdrawn = block.timestamp;
-        withdrawPartnerBalances[partner] +=  amountToSend;
+        withdrawPartnerBalances[partner] += amountToSend;
     }
 
     // allow deposit of funds

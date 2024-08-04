@@ -26,10 +26,10 @@ contract DexTwo is Ownable {
         IERC20(from).transferFrom(msg.sender, address(this), amount);
         IERC20(to).approve(address(this), swapAmount);
         IERC20(to).transferFrom(address(this), msg.sender, swapAmount);
-    } 
+    }
 
-    function getSwapAmount(address from, address to, uint amount) public view returns(uint){
-        return((amount * IERC20(to).balanceOf(address(this)))/IERC20(from).balanceOf(address(this)));
+    function getSwapAmount(address from, address to, uint amount) public view returns (uint) {
+        return ((amount * IERC20(to).balanceOf(address(this))) / IERC20(from).balanceOf(address(this)));
     }
 
     function approve(address spender, uint amount) public {
@@ -37,14 +37,14 @@ contract DexTwo is Ownable {
         SwappableTokenTwo(token2).approve(msg.sender, spender, amount);
     }
 
-    function balanceOf(address token, address account) public view returns (uint){
+    function balanceOf(address token, address account) public view returns (uint) {
         return IERC20(token).balanceOf(account);
     }
 }
 
 contract SwappableTokenTwo is ERC20 {
     address private _dex;
-    
+
     constructor(address dexInstance, string memory name, string memory symbol, uint initialSupply) ERC20(name, symbol) {
         _mint(msg.sender, initialSupply);
         _dex = dexInstance;
