@@ -50,7 +50,7 @@ npx hardhat test --network localhost --parallel
 
 Unit tests (Hardhat):
 
-* [\\Ethernaut\\hardhat\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/hardhat/test/ethernaut.js) (1-24)
+* [\\Ethernaut\\hardhat\\test\\ethernaut.js](https://github.com/ivan-sincek/solidity-learning/blob/main/Ethernaut/hardhat/test/ethernaut.js) (1-25)
 
 _\[Deprecated\]_ Unit tests (Truffle):
 
