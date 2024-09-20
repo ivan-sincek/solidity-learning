@@ -1,0 +1,21 @@
+{
+    "name": "ethernaut-project",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@ethersproject/address": "^5.7.0",
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "@openzeppelin/contracts": "4.9.2",
+        "@openzeppelin/contracts-upgradeable": "^4.9.2",
+        "chai-as-promised": "^7.1.1",
+        "hardhat": "^2.20.1",
+        "hardhat-tracer": "^3.1.0",
+        "web3": "^4.11.1"
+    }
+}
